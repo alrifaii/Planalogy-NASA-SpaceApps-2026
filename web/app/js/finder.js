@@ -36,7 +36,7 @@ const rgba = c => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${c[3].toFixed(3)})`
 
 TT.pages.finder = function(root){
   const C = TT.Caps, S = TT.Store;
-  const st = {m:null, target:'gale', custom:null, preset:null, year:'now', dry:true, cw:{}, fw:Object.assign({}, DEFAULT_FW),
+  const st = {m:null, target:'gale', custom:null, preset:null, year:'now', scen:null, tab:'target', hires:null, dry:true, cw:{}, fw:Object.assign({}, DEFAULT_FW),
               req:[], reqF:[], res:null, sims:null, sel:null, view:'earth', ai:null, busy:false, picking:false};
   let g3 = null, dead = false, ctrl = null;
   const simCache = new Map();
@@ -50,13 +50,14 @@ TT.pages.finder = function(root){
   const status = h('div', {class:'statusline', role:'status', 'aria-live':'polite'});
   const legend = h('div', {class:'f-legend'});
   const mkb = (icon, label, fn) => h('button', {class:'btn ghost icon', type:'button', 'aria-label':label, title:label, html:TT.icons[icon], onclick:fn});
-  const bView = h('button', {class:'btn sm', type:'button', onclick: () => setView(st.view === 'earth' ? 'mars' : 'earth')});
+  const bView = h('button', {class:'btn sm view', type:'button', onclick: () => setView(st.view === 'earth' ? 'mars' : 'earth')});
   const bL = h('button', {class:'btn sm', type:'button', onclick: () => sheet('l')}, TT.icon('filter'), 'Mission');
   const bR = h('button', {class:'btn sm', type:'button', onclick: () => sheet('r')}, TT.icon('list'), 'Sites');
   const dock = h('div', {class:'glass dock', role:'toolbar', 'aria-label':'Globe controls'},
     mkb('plus', 'Zoom in', () => g3 && g3.zoomBy(.7)), mkb('minus', 'Zoom out', () => g3 && g3.zoomBy(1.4)),
-    h('span', {class:'div'}), bView, h('span', {class:'div'}), legend, h('span', {class:'sheet-btns'}, bL, bR));
-  ex.append(cv, flat, leftP, rightP, dock, status);
+    h('span', {class:'div'}), bView, h('span', {class:'sheet-btns'}, bL, bR));
+  const tl = h('div', {class:'tl now', hidden:true, role:'group', 'aria-label':'Year and climate scenario'});
+  ex.append(cv, flat, leftP, rightP, dock, tl, status);
   root.appendChild(ex);
   const sheet = w => { leftP.classList.toggle('open', w === 'l' && !leftP.classList.contains('open')); rightP.classList.toggle('open', w === 'r' && !rightP.classList.contains('open')); };
 
@@ -75,23 +76,33 @@ TT.pages.finder = function(root){
   const aiOff = h('p', {class:'tiny muted'}, 'AI weights need Claude access in this view.');
   const sliders = h('div', {class:'f-sliders'});
   const dryInp = h('input', {type:'checkbox', id:'f-dry', checked:true, onchange: e => { st.dry = e.target.checked; rescore(); }});
-  const yearSec = h('div', {class:'panel-sec', hidden:true});
-  const yearSeg = h('div', {class:'seg f-seg', role:'radiogroup', 'aria-label':'Year'});
-  yearSec.append(h('h4', null, 'Year'), yearSeg);
-  leftP.append(
-    h('div', {class:'panel-head'}, h('h2', {style:{fontSize:'1.05rem'}}, 'Analog Finder'), h('button', {class:'btn ghost sm icon sheet-close', type:'button', 'aria-label':'Close', html:TT.icons.close, onclick: () => sheet(null)})),
-    h('div', {class:'panel-body'},
-      h('div', {class:'panel-sec'}, h('h4', null, 'Mars target'), targetSeg, pickBtn, myPts, customBox),
-      h('div', {class:'panel-sec'}, h('h4', null, 'Mission'), presetBox, verdict),
-      h('div', {class:'panel-sec'}, h('h4', null, 'Your own mission'), aiBox, aiOff),
-      h('div', {class:'panel-sec'}, h('h4', null, 'Weights'), sliders),
-      h('div', {class:'panel-sec'}, h('label', {class:'f-switch', for:'f-dry'}, dryInp, h('span', null, 'Dry, bare land only'))),
-      yearSec));
+  const TABS = [['target', 'target', 'Target'], ['mission', 'mission', 'Mission'], ['weights', 'sliders', 'Weights']];
+  const panes = {
+    target: h('div', {class:'p-pane'}, h('div', {class:'panel-sec'}, h('h4', null, 'Mars target'), h('p', {class:'p-lead'}, 'The place on Mars you want to rehearse for.'), targetSeg, pickBtn, myPts, customBox)),
+    mission: h('div', {class:'p-pane'}, h('div', {class:'panel-sec'}, h('h4', null, 'Mission'), h('p', {class:'p-lead'}, 'Each mission weighs the surface differently.'), presetBox, verdict),
+      h('div', {class:'panel-sec'}, h('h4', null, 'Your own mission'), aiBox, aiOff)),
+    weights: h('div', {class:'p-pane'}, h('div', {class:'panel-sec'}, h('h4', null, 'Weights'), h('p', {class:'p-lead'}, 'How much each property counts, 0 to 5.'), sliders),
+      h('div', {class:'panel-sec'}, h('label', {class:'f-switch', for:'f-dry'}, dryInp, h('span', null, 'Dry, bare land only'))))
+  };
+  const tabBar = h('div', {class:'p-tabs', role:'tablist'});
+  const foldBtn = h('button', {class:'p-fold', type:'button', 'aria-label':'Hide panel', html:TT.icons.collapse, onclick: () => {
+    const f = leftP.classList.toggle('folded'); foldBtn.innerHTML = TT.icons[f ? 'expand' : 'collapse']; foldBtn.setAttribute('aria-label', f ? 'Show panel' : 'Hide panel'); }});
+  function setTab(t){
+    st.tab = t; TT.clear(tabBar);
+    TABS.forEach(([id, ic, label]) => tabBar.appendChild(h('button', {type:'button', role:'tab', 'aria-selected': id === t, onclick: () => setTab(id)}, TT.icon(ic), label)));
+    tabBar.appendChild(foldBtn);
+    Object.keys(panes).forEach(k => { panes[k].hidden = k !== t; });
+  }
+  setTab('target');
+  leftP.append(tabBar,
+    h('div', {class:'panel-head'}, h('h2', null, 'Analog Finder'), h('button', {class:'btn ghost sm icon sheet-close', type:'button', 'aria-label':'Close', html:TT.icons.close, onclick: () => sheet(null)})),
+    h('div', {class:'panel-body'}, panes.target, panes.mission, panes.weights));
 
   /* ---------- right panel ---------- */
   const rHead = h('div', {class:'panel-head'});
   const rBody = h('div', {class:'panel-body'});
-  rightP.append(rHead, rBody);
+  const rLegend = h('div', {class:'r-legend'}, h('span', null, 'Similarity to the target'), legend);
+  rightP.append(rHead, rLegend, rBody);
 
   /* ---------- globe ---------- */
   if (TT.webgl) g3 = TT.createGlobe(cv, {body:'earth', markerPx:26, dist:2.9,
@@ -127,21 +138,23 @@ TT.pages.finder = function(root){
     return cw;
   }
 
+  const scens = () => Object.keys((st.m.files.earth_by_scenario) || {});
+  const yearFile = year => { const by = st.m.files.earth_by_scenario; return (by && by[st.scen] && by[st.scen][year]) || st.m.files.earth[year]; };
   async function earthTable(year){
     const base = await load(st.m.files.earth.now);
     if (year === 'now') return base;
-    const key = 'earth@' + year;
-    if (!cache[key]) cache[key] = load(st.m.files.earth[year]).then(yt => PS.earthForYear(base, yt));
+    const file = yearFile(year), key = 'earth@' + file;
+    if (!cache[key]) cache[key] = load(file).then(yt => PS.earthForYear(base, yt));
     return cache[key];
   }
 
   async function rescore(){
     if (dead || !st.m) return;
-    const t = target(), y = st.year, tk = st.target === 'custom' ? t.lat + ',' + t.lon : st.target;
+    const t = target(), y = st.year, sc = st.scen, tk = st.target === 'custom' ? t.lat + ',' + t.lon : st.target;
     try {
       const earth = await earthTable(y);
-      if (dead || y !== st.year) return;
-      const key = tk + '@' + y;
+      if (dead || y !== st.year || sc !== st.scen) return;
+      const key = tk + '@' + y + (y === 'now' ? '' : '@' + sc);
       if (!simCache.has(key)) simCache.set(key, PS.similarities(st.m, earth, t.values));
       st.sims = simCache.get(key);
       st.res = PS.scoreCells(st.m, earth, st.sims, {categoryWeights: effectiveCW(), featureWeights: effectiveFW(),
@@ -273,10 +286,32 @@ TT.pages.finder = function(root){
       sliders.appendChild(h('div', {class:'f-slider' + (na ? ' off' : '')}, h('label', {for:id}, c.label, val), inp, why ? h('div', {class:'tiny muted'}, why) : null));
     });
   }
+  /* the time arc: today on the left, the projected years along a shallow orbit */
   function drawYears(){
-    const ys = st.m.years; yearSec.hidden = ys.length < 2; TT.clear(yearSeg);
-    ys.forEach(y => yearSeg.appendChild(h('button', {type:'button', role:'radio', 'aria-checked': String(y) === String(st.year), onclick: () => { st.year = String(y); drawYears(); rescore(); }}, y === 'now' ? 'Today' : String(y))));
+    const ys = st.m.years.map(String); tl.hidden = ys.length < 2; if (tl.hidden) return;
+    TT.clear(tl);
+    const W = 1000, Y0 = 52, SAG = 30, n = ys.length, cur = Math.max(0, ys.indexOf(String(st.year)));
+    const at = i => { const t = n === 1 ? .5 : i / (n - 1), x = 60 + t * (W - 120); return [x, Y0 + SAG * 4 * t * (1 - t)]; };
+    const path = k => { let d = ''; for (let i = 0; i <= 40; i++){ const t = (i / 40) * k, x = 60 + t * (W - 120), y = Y0 + SAG * 4 * t * (1 - t); d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); } return d; };
+    const fut = st.year !== 'now';
+    tl.className = 'tl ' + (fut ? 'future' : 'now');
+    tl.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 ' + W + ' 96" preserveAspectRatio="none" aria-hidden="true"><path class="arc" vector-effect="non-scaling-stroke" d="' + path(1) + '"/>' + (cur ? '<path class="arc-done" vector-effect="non-scaling-stroke" d="' + path(cur / (n - 1)) + '"/>' : '') + '</svg>');
+    tl.appendChild(h('button', {class:'tl-now', type:'button', title:'Back to today', onclick: () => setYear('now')}, fut ? 'Projected' : 'Today'));
+    tl.appendChild(h('div', {class:'tl-what'}, fut ? 'Earth in ' + st.year : 'Measured climate'));
+    const ss = scens();
+    if (ss.length > 1){
+      const box = h('div', {class:'tl-scen', role:'radiogroup', 'aria-label':'Climate scenario'});
+      ss.forEach(s => box.appendChild(h('button', {type:'button', role:'radio', 'aria-checked': s === st.scen, title: (st.m.scenario_labels || {})[s] || s,
+        onclick: () => { st.scen = s; if (st.year === 'now') st.year = ys[Math.min(2, n - 1)]; drawYears(); rescore(); }}, s.replace(/^ssp(\d)(\d)(\d)$/, 'SSP$1-$2.$3'))));
+      tl.appendChild(box);
+    }
+    const stops = h('div', {role:'radiogroup', 'aria-label':'Year'});
+    ys.forEach((y, i) => { const [x, yy] = at(i);
+      stops.appendChild(h('button', {class:'tl-stop', type:'button', role:'radio', 'aria-checked': i === cur, style:{left: (x / W * 100) + '%', top: yy + 'px'},
+        onclick: () => setYear(y)}, h('i'), h('span', null, y === 'now' ? 'Today' : y))); });
+    tl.appendChild(stops);
   }
+  function setYear(y){ st.year = String(y); drawYears(); rescore(); }
   function drawAI(){ const on = !!(C && C.sample); aiBox.hidden = !on; aiOff.hidden = on; }
   function drawLeft(){ drawTargets(); drawCustom(); drawPresets(); drawSliders(); drawYears(); drawAI(); }
 
@@ -303,7 +338,7 @@ TT.pages.finder = function(root){
     const close = h('button', {class:'btn ghost sm icon sheet-close', type:'button', 'aria-label':'Close', html:TT.icons.close, onclick: () => sheet(null)});
     const it = st.sel && st.res.ranked.find(x => x.id === st.sel);
     if (it){ drawCard(it, close); return; }
-    rHead.append(h('h2', {style:{fontSize:'1.05rem'}}, 'Best analogs'), close);
+    rHead.append(h('h2', null, 'Best analogs'), close);
     const r = st.res;
     rBody.append(h('p', {class:'tiny muted', style:{margin:'0 0 8px'}}, r.ranked.length.toLocaleString() + ' ranked · ' + r.partial.length.toLocaleString() + ' incomplete' + (r.excluded.length ? ' · ' + r.excluded.length.toLocaleString() + ' fail a requirement' : '')));
     r.ranked.slice(0, TOP).forEach(x => rBody.appendChild(siteRow(x)));
@@ -333,8 +368,29 @@ TT.pages.finder = function(root){
       card.partial.length ? h('div', {class:'f-group'}, h('h4', null, 'Partly'), card.partial.map(c => catRow(c, 'mid'))) : null,
       card.mismatches.length ? h('div', {class:'f-group'}, h('h4', null, 'Different'), card.mismatches.map(c => catRow(c, 'low'))) : null,
       off.length ? h('p', {class:'tiny muted'}, 'Not scored: ' + off.map(c => c.label).join(', ')) : null,
+      hiresBlock(it),
       h('details', {class:'f-limits'}, h('summary', {class:'small'}, 'What Earth cannot reproduce'),
         h('ul', {class:'small'}, limits().map(x => h('li', null, x))))]);
+  }
+  /* 1-km zoom-in for the sites the Data team downloaded in high resolution (process_future_hires.py) */
+  function hiresBlock(it){
+    const site = st.hires && st.hires.sites.find(s => s.lat === it.lat && s.lon === it.lon);
+    if (!site || !site.today) return null;
+    const ss = Object.keys(site.scenarios || {}); if (!ss.length) return null;
+    const sc = ss.includes(st.scen) ? st.scen : ss[0], yrs = Object.keys(site.scenarios[sc]).sort();
+    const cols = [['Today', site.today]].concat(yrs.map(y => [y, site.scenarios[sc][y]]));
+    const f = (v, d) => v == null ? '–' : (+v).toFixed(d);
+    const row = (label, key, d, unit) => h('tr', null, h('td', null, label), cols.map(([, v], i) => h('td', {class: i && v[key] != null && cols[0][1][key] != null ? (v[key] > cols[0][1][key] ? 'up' : v[key] < cols[0][1][key] ? 'down' : '') : ''}, f(v[key], d) + (unit || ''))));
+    const map = site.maps && site.maps[sc];
+    const nm = cols[cols.length - 1][1].n_models;
+    return h('div', {class:'hr'},
+      h('h4', null, 'Inside this cell', h('span', {class:'km'}, '1 km')),
+      h('p', {class:'tiny muted', style:{margin:0}}, 'Climate today and projected, ' + sc.replace(/^ssp(\d)(\d)(\d)$/, 'SSP$1-$2.$3') + (nm ? ', mean of ' + nm + ' model' + (nm > 1 ? 's' : '') : '') + '.'),
+      h('table', null, h('thead', null, h('tr', null, h('th', null, ''), cols.map(([y]) => h('th', null, y)))),
+        h('tbody', null, row('Air temperature', 'tmean_C', 1, ' °C'), row('Day–night swing', 'air_temp_swing_K', 1, ' K'), row('Rain per year', 'precip_mm_yr', 0, ' mm'),
+          row('Hyper-arid share', 'share_hyperarid_pct', 0, ' %'), row('Dry enough for Mars', 'share_mars_dry_pct', 0, ' %'))),
+      h('p', {class:'tiny muted', style:{margin:0}}, 'Within the cell today: ' + f(site.today.tmean_min_C, 1) + ' to ' + f(site.today.tmean_max_C, 1) + ' °C. Fine pattern from today\'s climate; the change comes from coarse climate models.'),
+      map ? h('a', {href: DATA + 'hires/' + map, target:'_blank', rel:'noopener'}, h('img', {src: DATA + 'hires/' + map, alt:'1-km maps of temperature and aridity for this cell, today and projected', loading:'lazy'})) : null);
   }
   function limits(){
     const p = st.m.presets.find(x => x.id === st.preset);
@@ -390,10 +446,11 @@ TT.pages.finder = function(root){
   }
 
   /* ---------- start ---------- */
-  rHead.append(h('h2', {style:{fontSize:'1.05rem'}}, 'Best analogs'));
+  rHead.append(h('h2', null, 'Best analogs'));
   rBody.append(h('p', {class:'muted small'}, 'Loading…'));
   load('manifest.json').then(m => {
-    if (dead) return; st.m = m;
+    if (dead) return; st.m = m; st.scen = m.scenario || scens()[0] || null;
+    if (m.files.hires) load(m.files.hires).then(d => { st.hires = d; if (st.sel) drawRight(); }).catch(() => {});
     applyPreset(m.presets[0]); drawLeft(); setView('earth'); rescore();
   }).catch(e => { console.error(e); TT.clear(rBody); rBody.append(h('p', {class:'muted small'}, 'Analog data could not be loaded.')); });
   const onResize = TT.debounce(() => { if (!g3 && st.res) drawFlat(); }, 150);

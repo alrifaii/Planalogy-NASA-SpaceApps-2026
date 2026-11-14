@@ -27,6 +27,9 @@ function route(){
   const page = {finder:TT.pages.finder, home:TT.pages.home, explore:TT.pages.explore, detail:TT.pages.detail, compare:TT.pages.compare, about:TT.pages.about, admin:TT.pages.admin}[r.name];
   const titles = {finder:'Analog Finder — Planalogy', home:'Planalogy — Find Earth\'s Extremes', explore:'Explore — Planalogy', detail:'Location — Planalogy', compare:'Compare — Planalogy', about:'About and methodology — Planalogy', admin:'Admin — Planalogy'};
   document.title = titles[r.name];
+  document.body.dataset.route = r.name;
+  const crumbs = {finder:'Analog Finder', explore:'Explore', detail:'Location', compare:'Compare', about:'About', admin:'Admin'};
+  TT.$('#crumb').textContent = crumbs[r.name] || '';
   nav.querySelectorAll('a').forEach(a => { if (a.dataset.r === r.name || (r.name === 'detail' && a.dataset.r === 'explore')) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   foot.hidden = r.name === 'explore' || r.name === 'admin' || r.name === 'finder';
   try { current = page(main, r) || null; } catch(e){ console.error(e); main.appendChild(h('div', {class:'wrap page'}, h('h1', null, 'Something went wrong'), h('p', {class:'muted'}, 'This page failed to load: ' + e.message), h('a', {class:'btn', href:'#'}, 'Back to home'))); }

@@ -30,6 +30,7 @@ Output (default web/app/data/planalogy/, read by the Planalogy web app):
 from __future__ import annotations
 
 import json
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -129,6 +130,23 @@ def _preset_entry(preset: dict, data_dir: Path, calibrate: bool) -> dict[str, An
     }
 
 
+SCENARIO_LABELS = {"ssp245": "SSP2-4.5 (middle of the road)", "ssp585": "SSP5-8.5 (high emissions)"}
+
+
+def export_hires(data_dir: Path, out_dir: Path) -> str | None:
+    """Copy the Data team's 1-km site results (data/hires_sites/, made by process_future_hires.py) for the app."""
+    src = Path(data_dir).parent / "hires_sites"
+    summary = src / "future_hires_summary.json"
+    if not summary.exists():
+        return None
+    dst = out_dir / "hires"
+    dst.mkdir(parents=True, exist_ok=True)
+    for f in src.glob("*.png"):
+        shutil.copyfile(f, dst / f.name)
+    shutil.copyfile(summary, dst / "summary.json")
+    return "hires/summary.json"
+
+
 def export(data_dir: Path, out_dir: Path, calibrate: bool = True,
            scenario: str | None = es.DEFAULT_SCENARIO) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -149,6 +167,24 @@ def export(data_dir: Path, out_dir: Path, calibrate: bool = True,
                                                    "rows": [[r[i] for i in keep] for r in rows]}
         _write(out_dir / name, payload)
         files["earth"][str(year or "now")] = name
+    # every other scenario too, so the app can switch (default scenario keeps the plain earth_<year>.json names)
+    by_scen: dict[str, dict[str, str]] = {}
+    for scen in es.scenarios(data_dir):
+        if scen == scenario:
+            by_scen[scen] = {k: v for k, v in files["earth"].items() if k != "now"}
+            continue
+        by_scen[scen] = {}
+        keep = [full_cols.index(c) for c in ["id"] + YEAR_COLUMNS]
+        for year, fname in sorted(es.yearly_files(data_dir, scen)):
+            rows = _earth_rows(es.load_grid(str(data_dir), fname))
+            name = f"earth_{scen}_{year}.json"
+            _write(out_dir / name, {"columns": ["id"] + YEAR_COLUMNS, "base": "earth.json",
+                                    "rows": [[r[i] for i in keep] for r in rows]})
+            by_scen[scen][str(year)] = name
+    files["earth_by_scenario"] = by_scen
+    hires = export_hires(data_dir, out_dir)
+    if hires:
+        files["hires"] = hires
     targets = []
     for n, (lat, lon) in CELLS.items():
         site = g.cell_site("mars", base["mars"], (lat, lon), base["mars_ati"])
@@ -166,6 +202,7 @@ def export(data_dir: Path, out_dir: Path, calibrate: bool = True,
         "years": ["now"] + [y for y in years if y is not None],
         "scenario": scenario if yearly and "/" in next(iter(yearly.values())) else None,
         "scenarios_available": es.scenarios(data_dir),
+        "scenario_labels": {k: v for k, v in SCENARIO_LABELS.items() if k in es.scenarios(data_dir)},
         "future_note": "Yearly files: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. day-night "
                        "air swing, precipitation (dry/bare filter), aridity. NDVI, ground temperature, terrain, rock "
                        "type, craters and albedo stay as today (no projection).",

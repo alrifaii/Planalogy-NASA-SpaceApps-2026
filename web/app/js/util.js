@@ -7,7 +7,9 @@ TT.h = function h(tag, attrs){
   const el = document.createElement(tag);
   if (attrs) for (const k in attrs){
     const v = attrs[k];
-    if (v == null || v === false) continue;
+    if (v == null) continue;
+    if (k.slice(0,5) === 'aria-' && typeof v === 'boolean'){ el.setAttribute(k, String(v)); continue; }   // aria states need "true"/"false"
+    if (v === false) continue;
     if (k === 'class') el.className = v;
     else if (k === 'html') el.innerHTML = v;            // trusted static markup only (icons)
     else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
@@ -56,7 +58,12 @@ TT.icons = {
   image: I('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
   book: I('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/>'),
   eye: I('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
-  out: I('<path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M16 8l4 4-4 4M20 12H9"/>')
+  out: I('<path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M16 8l4 4-4 4M20 12H9"/>'),
+  sliders: I('<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'),
+  target: I('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'),
+  mission: I('<path d="M5 19l3-1 8-8a3 3 0 0 0-4-4l-8 8-1 3z"/><path d="M14 6l4 4"/>'),
+  collapse: I('<path d="M11 7l-5 5 5 5M18 7l-5 5 5 5"/>'),
+  expand: I('<path d="M13 7l5 5-5 5M6 7l5 5-5 5"/>')
 };
 TT.icon = name => h('span', {html: TT.icons[name] || '', 'aria-hidden': 'true', style: {display:'inline-flex'}});
 

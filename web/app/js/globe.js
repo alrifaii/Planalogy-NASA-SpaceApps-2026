@@ -5,9 +5,9 @@ const TT = window.TT, h = TT.h;
 const D2R = Math.PI / 180;
 
 const TEX = {
-  earth:{map:'tex/earth_nasa.jpg', spec:'tex/earth_specular_2048.jpg', clouds:'tex/earth_clouds_1024.png', topo:'tex/earth_topo.jpg', glow:0x6EA8E8},
+  earth:{map:'tex/earth_hd.jpg', bump:'tex/earth_bump.jpg', bumpScale:0.006, spec:'tex/earth_specular_2048.jpg', clouds:'tex/earth_clouds_1024.png', topo:'tex/earth_topo.jpg', glow:0x6EA8E8},
   moon:{map:'tex/moon_nasa.jpg', bump:'tex/moon_1024.jpg', bumpScale:0.012, glow:0x9FB0C8},
-  mars:{map:'tex/mars_nasa.jpg', bump:'tex/marsbump1k.jpg', bumpScale:0.02, glow:0xD18B55}
+  mars:{map:'tex/mars_hd.jpg', bump:'tex/mars_bump_hd.jpg', bumpScale:0.012, glow:0xD18B55}
 };
 TT.TEX = TEX;
 
@@ -42,7 +42,7 @@ function spriteMat(kind, dim, sel){
 function makePlanet(body, renderer, onLoad){
   const cfg = TEX[body], g = new THREE.Group(); g.name = body;
   const mat = new THREE.MeshPhongMaterial({color: 0xffffff, shininess: body === 'earth' ? 14 : 2, specular: new THREE.Color(body === 'earth' ? 0x1c2736 : 0x050505)});
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 64), mat); g.add(mesh);
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 192, 96), mat); g.add(mesh);
   TT.loadImage(cfg.map).then(img => { mat.map = mkTex(img, true, renderer); mat.needsUpdate = true; onLoad && onLoad(body, 'map'); }).catch(e => onLoad && onLoad(body, 'error', e));
   if (cfg.bump) TT.loadImage(cfg.bump).then(img => { mat.bumpMap = mkTex(img, false, renderer); mat.bumpScale = cfg.bumpScale; mat.needsUpdate = true; }).catch(() => {});
   if (cfg.spec) TT.loadImage(cfg.spec).then(img => { mat.specularMap = mkTex(img, false, renderer); mat.needsUpdate = true; }).catch(() => {});

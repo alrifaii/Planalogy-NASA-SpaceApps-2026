@@ -475,6 +475,10 @@
     "ssp245",
     "ssp585"
   ],
+  "scenario_labels": {
+    "ssp245": "SSP2-4.5 (middle of the road)",
+    "ssp585": "SSP5-8.5 (high emissions)"
+  },
   "future_note": "Yearly files: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. day-night air swing, precipitation (dry/bare filter), aridity. NDVI, ground temperature, terrain, rock type, craters and albedo stay as today (no projection).",
   "year_columns": [
     "surface_temp_swing_K",
@@ -492,7 +496,22 @@
       "2070": "earth_2070.json",
       "2090": "earth_2090.json"
     },
-    "mars": "mars.json"
+    "mars": "mars.json",
+    "earth_by_scenario": {
+      "ssp245": {
+        "2030": "earth_2030.json",
+        "2050": "earth_2050.json",
+        "2070": "earth_2070.json",
+        "2090": "earth_2090.json"
+      },
+      "ssp585": {
+        "2030": "earth_ssp585_2030.json",
+        "2050": "earth_ssp585_2050.json",
+        "2070": "earth_ssp585_2070.json",
+        "2090": "earth_ssp585_2090.json"
+      }
+    },
+    "hires": "hires/summary.json"
   },
   "dry_bare_rule": "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)",
   "thresholds": {

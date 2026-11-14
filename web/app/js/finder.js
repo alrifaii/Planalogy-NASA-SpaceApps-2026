@@ -170,15 +170,18 @@ TT.pages.finder = function(root){
     const snap = y => { const k = 'earth@' + sc.id + '@' + y; if (!cache[k]) cache[k] = load(sc.files[String(y)]).then(t => PS.earthForYear(base, t)); return cache[k]; };
     if (sc.files[String(year)]) return snap(year);
     const ys = sc.years, lo = ys.filter(y => y < year).pop(), hi = ys.find(y => y > year);
-    if (lo == null || hi == null) return snap(lo != null ? lo : hi);
+    // before the first projection: blend today's observed climate into it, so the slider has no jump
+    if (lo == null){ const t0 = todayYear(sc); return PS.blendEarth(st.m, base, await snap(hi), (year - t0) / (hi - t0)); }
+    if (hi == null) return snap(lo);
     const [a, b] = await Promise.all([snap(lo), snap(hi)]);
     return PS.blendEarth(st.m, a, b, (year - lo) / (hi - lo));  // between projections: linear, not cached (memory)
   }
-  /* years on the slider: today, then every year from the first to the last projection */
+  /* years on the slider: today, then every year up to the last projection (today counts as the current year) */
+  const todayYear = sc => Math.min(new Date().getFullYear(), sc.years[0] - 1);
   function yearList(){
     const sc = scen();
     if (!sc) return st.m.years;
-    const out = ['now']; for (let y = sc.years[0]; y <= sc.years[sc.years.length - 1]; y++) out.push(y);
+    const out = ['now']; for (let y = todayYear(sc) + 1; y <= sc.years[sc.years.length - 1]; y++) out.push(y);
     return out;
   }
   function yearCaption(){
@@ -187,6 +190,7 @@ TT.pages.finder = function(root){
     const short = (sc.short ? sc.short + ', ' : '') + (sc.code || sc.label.split(' · ')[0]);
     if (sc.years.includes(st.year)) return 'Climate projection ' + short + ' (CMIP6, multi-model mean).';
     const lo = sc.years.filter(y => y < st.year).pop(), hi = sc.years.find(y => y > st.year);
+    if (lo == null) return 'Between today and the ' + hi + ' projection (' + short + '), interpolated linearly.';
     return 'Between the ' + lo + ' and ' + hi + ' projections (' + short + '), interpolated linearly.';
   }
   function setYearIdx(i){

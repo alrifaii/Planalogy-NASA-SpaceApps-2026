@@ -114,11 +114,12 @@ TT.createGlobe = function(canvas, o){
     setOverlay(body, cv){
       if (!planets[body]) { planets[body] = makePlanet(body, renderer, (b, what, e) => { o.onLoad && o.onLoad(b, what, e); }); planets[body].visible = planets[body] === cur; scene.add(planets[body]); }
       const u = planets[body].userData;
-      if (u.overlay){ planets[body].remove(u.overlay); u.overlay.material.map && u.overlay.material.map.dispose(); u.overlay.material.dispose(); u.overlay = null; }
+      if (u.overlay && cv && u.overlay.userData.cv === cv && u.overlay.userData.w === cv.width){ u.overlay.material.map.needsUpdate = true; return; }
+      if (u.overlay){ planets[body].remove(u.overlay); u.overlay.material.map && u.overlay.material.map.dispose(); u.overlay.material.dispose(); u.overlay.geometry.dispose(); u.overlay = null; }
       if (!cv) return;
       const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
       const m = new THREE.Mesh(new THREE.SphereGeometry(1.0028, 128, 64), new THREE.MeshBasicMaterial({map: t, transparent: true, depthWrite: false}));
-      m.renderOrder = 3; planets[body].add(m); u.overlay = m;
+      m.renderOrder = 3; m.userData.cv = cv; m.userData.w = cv.width; planets[body].add(m); u.overlay = m;
     },
     setMarkers(list, keep){
       items = list; if (!cur) return;

@@ -7,13 +7,13 @@ const TT = window.TT, h = TT.h, PS = window.PlanalogyScoring;
 const DATA = 'data/planalogy/';
 const TOP = 12;
 const REGION = {
-  '-23.5,-68.5': 'Atacama Desert, Chile', '34.5,76.5': 'Ladakh / Aksai Chin', '37.5,75.5': 'Pamir, Xinjiang',
+  '-23.5,-68.5': 'Atacama · Monturaqui crater, Chile', '34.5,76.5': 'Ladakh / Aksai Chin', '37.5,75.5': 'Pamir, Xinjiang',
   '40.5,78.5': 'Tarim Basin margin', '38.5,76.5': 'Kashgar, Tarim Basin', '31.5,-5.5': 'Pre-Saharan Morocco',
   '41.5,79.5': 'Northern Tarim Basin', '14.5,40.5': 'Danakil Depression', '30.5,69.5': 'Balochistan',
   '30.5,81.5': 'Ngari, western Tibet', '44.5,83.5': 'Junggar Basin', '30.5,84.5': 'Tibetan Plateau',
   '30.5,87.5': 'Tibetan Plateau', '31.5,81.5': 'Western Tibetan Plateau', '30.5,83.5': 'Tibetan Plateau',
   '67.5,177.5': 'Chukotka', '70.5,-54.5': 'West Greenland', '37.5,45.5': 'Lake Urmia basin, Iran',
-  '-24.5,-69.5': 'Atacama Desert, Chile', '-24.5,-67.5': 'Salar de Arizaro', '39.5,73.5': 'Kara-Kul, Pamir',
+  '-24.5,-69.5': 'Atacama core (Yungay), Chile', '-24.5,-67.5': 'Salar de Arizaro', '39.5,73.5': 'Kara-Kul, Pamir',
   '-77.5,161.5': 'McMurdo Dry Valleys', '75.5,-89.5': 'Devon Island (Haughton)', '39.5,99.5': 'Hexi Corridor, Gansu'
 };
 const DEFAULT_FW = {regional_relief_m:1, surface_temp_swing_K:2, surface_temp_min_K:1, ati_percentile:1, albedo:1, rock_group:1, inside_impact_structure:1, ground_ice_flag:1};
@@ -321,9 +321,12 @@ TT.pages.finder = function(root){
     const r = st.res;
     rBody.append(h('p', {class:'tiny muted', style:{margin:'0 0 8px'}}, r.ranked.length.toLocaleString() + ' ranked · ' + r.partial.length.toLocaleString() + ' incomplete' + (r.excluded.length ? ' · ' + r.excluded.length.toLocaleString() + ' fail a requirement' : '')));
     r.ranked.slice(0, TOP).forEach(x => rBody.appendChild(siteRow(x)));
-    const ks = (st.m.presets.find(p => p.id === st.preset) || {known_analogs: []}).known_analogs;
+    // the preset's own known analogs; with AI or hand-set weights, every known analog (one row per cell)
+    const own = st.preset && st.m.presets.find(p => p.id === st.preset);
+    const ks = own ? own.known_analogs
+      : st.m.presets.flatMap(p => p.known_analogs).filter((k, i, a) => a.findIndex(y => y.id === k.id) === i);
     if (ks.length){
-      rBody.appendChild(h('h4', {class:'f-sub'}, 'Known analogs'));
+      rBody.appendChild(h('h4', {class:'f-sub'}, own ? 'Known analogs' : 'Known analogs (all missions)'));
       ks.forEach(k => { const x = r.ranked.find(y => y.id === k.id);
         rBody.appendChild(x ? siteRow(x) : h('div', {class:'f-site off'}, h('span', {class:'f-pos mono'}, '—'), h('span', {class:'f-name'}, k.name, h('span', {class:'tiny muted', style:{display:'block'}}, r.partial.some(y => y.id === k.id) ? 'incomplete data' : r.excluded.some(y => y.id === k.id) ? 'fails a requirement' : 'filtered out (not dry, bare land)')), h('span', null))); });
     }

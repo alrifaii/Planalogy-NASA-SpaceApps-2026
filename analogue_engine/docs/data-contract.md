@@ -419,7 +419,35 @@ recommended.
 Helicopter flight is deliberately not a preset: it depends on air density,
 which Earth does not reproduce.
 
-## 9. Integration notes for the recommender
+## 9. Site cards (`explain`)
+
+```python
+from analogue_engine import explain
+card = explain(comparison_result)      # or explain(entry.result) for a ranked entry
+```
+
+A card re-arranges what the engine already computed; nothing is
+recalculated. Its fields:
+* `score_0_100`, `coverage_pct`, `status`, `rankable`;
+* `headline`, a one-line summary;
+* `matches` (category score ≥ 75), `partial_matches` (41–74) and
+  `mismatches` (≤ 40), each with per-feature similarity, target value and
+  site value;
+* `not_scored` (categories with weight 0);
+* `missing` (feature, reason, whether it blocks ranking);
+* `requirements`;
+* `earth_cannot_reproduce` (the declared limitations);
+* `caveats` and `thresholds`.
+
+The 75 / 40 thresholds are presentation choices for grouping, not
+scientific cut-offs, and they are configurable.
+
+`examples/real_data/site_cards.py <data_dir> [top_n]` writes
+`output_site_cards.json`: the top-n cards per mission preset, with lat/lon
+and whether the cell is a known analog. That is the map's "click a site"
+panel.
+
+## 10. Integration notes for the recommender
 
 * Similarity is evidence, not operational suitability. Activity
   recommendations need requirements agreed with science, applied by the

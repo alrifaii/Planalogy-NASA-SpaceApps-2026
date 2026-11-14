@@ -11,6 +11,7 @@ Similarity is not operational suitability; see docs/math-model.md.
 from .adapters import backend_payload, sites_from_wide_records
 from .calibration import CalibrationResult, CalibrationSettings, calibrate_weights
 from .timeline import TimelineResult, Trajectory, rank_over_years
+from .explain import explain
 from .engine import MODEL_ID, MODEL_VERSION, compare, rank
 from .errors import AnalogueEngineError, DataModeError, InvalidRequestError, ProfileError
 from .io import Bundle, load_bundle, load_sites_csv, loads_strict, parse_bundle, write_sites_csv
@@ -64,6 +65,7 @@ __all__ = [
     "backend_payload",
     "calibrate_weights",
     "compare",
+    "explain",
     "profile_to_dict",
     "rank_over_years",
     "TimelineResult",

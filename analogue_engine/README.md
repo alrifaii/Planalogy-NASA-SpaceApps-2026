@@ -30,7 +30,8 @@ profile (weights, scales τ, requirements), it:
    leave-one-out check, and then suggest new candidates
    (`calibrate_weights`; demo: `python examples/calibration/run_calibration.py`);
 7. can rank the same target year by year to show which sites gain or lose
-   analogy over time (`rank_over_years`, for the year slider).
+   analogy over time (`rank_over_years`, for the year slider);
+8. turns any result into a readable site card (`explain`).
 
 To run it on the Data team's 1° grid (the data is not in this repo):
 
@@ -112,7 +113,8 @@ src/analogue_engine/
   adapters.py       bridge to the backend wide table and its 0-100 similarity_scores
   calibration.py    weight calibration on known analogs (+ leave-one-out)
   timeline.py       rankings over years (gaining / losing analogs)
-tests/              174 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, calibration, timeline, review regressions)
+  explain.py        site cards: what matches, what doesn't, what is missing
+tests/              179 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, calibration, timeline, site cards, review regressions)
 examples/           synthetic fixture, runner script, example outputs
 docs/               math model, data contract, Spanish guide
 ```

@@ -20,11 +20,12 @@ Any regular grid works (1 degree, 50 km, ...): the manifest carries each
 planet's grid (step, origin, cell size in km) so the browser can find the
 Mars cell under a click and draw cells of the right size.
 
-Size. The artifact that hosts the app takes at most 16 MB. When the data
-files would exceed SIZE_BUDGET (e.g. 50 km cells: ~100k Earth and ~90k Mars
-cells), they are written gzip-compressed (.json.gz, about 4-5x smaller);
-values are unchanged, so the bit-for-bit check still holds. The 1-degree
-grid stays plain JSON.
+Size. The Claude artifact that hosts the app serves only standard web types
+(.json yes, .gz no) and takes up to 16 MB per file (64 MB per publish), so
+files are plain JSON by default. If one file would exceed FILE_BUDGET (fine
+grids), files are written gzip-compressed (.json.gz, about 4-5x smaller, values
+unchanged) for static hosts that serve them; for the artifact such a grid must
+be split into several files instead. --gzip / --no-gzip force either.
 
 Output (default web/app/data/planalogy/, read by the Planalogy web app):
   manifest.json              grid, features (comparator, tau), categories, targets, presets, years, files
@@ -76,7 +77,7 @@ YEAR_COLUMNS = ["surface_temp_swing_K", "surface_temp_min_K", "air_temp_swing_K"
 
 TARGET_KEYS = {"Gale Crater (Curiosity)": "gale", "Jezero Crater (Perseverance)": "jezero",
                "Arcadia Planitia (approx.)": "arcadia"}
-SIZE_BUDGET = 12_000_000  # bytes of uncompressed data files before switching to gzip (artifact limit: 16 MB)
+FILE_BUDGET = 15_000_000  # bytes of the largest data file before switching to gzip (artifact: 16 MB per file)
 
 
 def _feature_specs() -> list[dict[str, Any]]:
@@ -150,6 +151,7 @@ def _preset_entry(preset: dict, data_dir: Path, calibrate: bool, data: dict) -> 
 
 
 SCENARIO_LABELS = {"ssp245": "SSP2-4.5 · middle of the road", "ssp585": "SSP5-8.5 · high emissions"}
+SCENARIO_SHORT = {"ssp245": ("Moderate", "SSP2-4.5"), "ssp585": ("High emissions", "SSP5-8.5")}
 FUTURE_NOTE = ("Future years: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. the day-night "
                "air swing, precipitation and aridity (dry-land filter). NDVI, ground temperature, terrain, rock type, "
                "craters and albedo stay as today (no projection). The app interpolates linearly between the "
@@ -165,7 +167,7 @@ def export(
 ) -> dict[str, Any]:
     """Write the app's data files.
 
-    ``compress``: None = gzip only if over SIZE_BUDGET. ``scenario``: export
+    ``compress``: None = gzip only if a file is over FILE_BUDGET. ``scenario``: export
     one climate scenario folder (e.g. "ssp585"); None = every scenario folder
     found (the app switches between them), or the yearly files lying directly
     in data_dir when there are no scenario folders.
@@ -192,7 +194,7 @@ def export(
             scen_files[scen][str(year)] = name
 
     blobs = {name: _encode(pl) for name, pl in payloads.items()}
-    use_gzip = sum(len(b) for b in blobs.values()) > SIZE_BUDGET if compress is None else compress
+    use_gzip = max(len(b) for b in blobs.values()) > FILE_BUDGET if compress is None else compress
     ext = ".json.gz" if use_gzip else ".json"
     written = set()
     for name, payload in payloads.items():
@@ -211,6 +213,7 @@ def export(
     files: dict[str, Any] = {"earth": {"now": "earth" + ext, **{y: n + ext for y, n in scen_files[first].items()}},
                              "mars": "mars" + ext}
     scenario_list = [{"id": sc, "label": SCENARIO_LABELS.get(sc, sc),
+                      "short": SCENARIO_SHORT.get(sc, (sc, ""))[0], "code": SCENARIO_SHORT.get(sc, (sc, sc))[1],
                       "years": [int(y) for y in files_],
                       "files": {y: n + ext for y, n in files_.items()}}
                      for sc, files_ in scen_files.items() if sc and files_]

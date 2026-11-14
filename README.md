@@ -92,9 +92,12 @@ cell and every Mars cell. `web/app/js/scoring.js` applies the engine's
 comparators, scales, weights and ordering. A test under Node.js checks that
 the similarities match the engine bit for bit and that the ranking is
 identical. Yearly Earth files only carry the climate-dependent columns.
-When the data files would exceed 12 MB (fine grids), they are written as
-gzip-compressed `.json.gz`, about 4x smaller, with unchanged values; the app
-reads both formats. Use `--gzip` or `--no-gzip` to force either.
+Files are plain JSON: the Claude artifact serves `.json` but not `.gz`, and
+accepts up to 16 MB per file. If one file would exceed 15 MB (fine grids), the
+export writes gzip-compressed `.json.gz` instead, about 4x smaller with
+unchanged values. The app reads both formats, but for the artifact such a grid
+has to be split into several files. Use `--gzip` or `--no-gzip` to force
+either.
 To refresh the data after new grid files, including yearly files for the
 year slider, run:
 

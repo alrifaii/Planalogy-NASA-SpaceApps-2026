@@ -85,6 +85,39 @@
     return { columns: base.columns, rows };
   }
 
+  /** Earth table for a year between two projected years (t = 0 at the first, 1 at the second).
+   *  Climate columns (manifest.year_columns, aridity) are interpolated linearly; flags switch at the midpoint,
+   *  except dry land, which follows the interpolated aridity index when there is one. Both tables are full
+   *  tables (earthForYear). This is a display aid between projections: the engine itself scores only the
+   *  projected years. */
+  function blendEarth(manifest, a, b, t) {
+    if (t <= 0) return a;
+    if (t >= 1) return b;
+    const ix = colIndex(a);
+    const cols = (manifest.year_columns || []).concat(['aridity_index'])
+      .filter((c, i, arr) => arr.indexOf(c) === i && ix[c] !== undefined && c !== 'dry_bare');
+    const dl = manifest.dry_land || {}, maxA = dl.max_aridity != null ? dl.max_aridity : 0.2;
+    const byId = new Map(b.rows.map(r => [r[ix.id], r]));
+    const seen = new Set(), rows = [];
+    for (const ra of a.rows) {
+      const id = ra[ix.id], rb = byId.get(id);
+      seen.add(id);
+      if (!rb) { if (t < 0.5) rows.push(ra); continue; }
+      const out = ra.slice();
+      for (const c of cols) {
+        const i = ix[c], x = ra[i], y = rb[i];
+        out[i] = typeof x === 'number' && typeof y === 'number' ? x + (y - x) * t : (t < 0.5 ? x : y);
+      }
+      if (ix.dry_bare !== undefined) {
+        const x = ra[ix.dry_bare], y = rb[ix.dry_bare], ai = ix.aridity_index !== undefined ? out[ix.aridity_index] : null;
+        out[ix.dry_bare] = x === y ? x : (typeof ai === 'number' ? ai <= maxA : (t < 0.5 ? x : y));
+      }
+      rows.push(out);
+    }
+    if (t >= 0.5) b.rows.forEach(rb => { if (!seen.has(rb[ix.id])) rows.push(rb); });
+    return { columns: a.columns, rows };
+  }
+
   /** Similarity of every Earth cell to a target, feature by feature. */
   function similarities(manifest, earth, targetValues) {
     const ix = colIndex(earth);
@@ -222,6 +255,6 @@
              missing: item.missing, failed: item.failed };
   }
 
-  return { gridOf, containingCell, marsCell, cellLabel, earthForYear, similarities, effectiveWeights, scoreCells,
+  return { gridOf, containingCell, marsCell, cellLabel, earthForYear, blendEarth, similarities, effectiveWeights, scoreCells,
            categoryScores, card };
 });

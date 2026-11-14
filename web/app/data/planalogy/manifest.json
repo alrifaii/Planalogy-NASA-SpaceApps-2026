@@ -510,6 +510,8 @@
     {
       "id": "ssp245",
       "label": "SSP2-4.5 · middle of the road",
+      "short": "Moderate",
+      "code": "SSP2-4.5",
       "years": [
         2030,
         2050,
@@ -517,15 +519,17 @@
         2090
       ],
       "files": {
-        "2030": "earth_ssp245_2030.json.gz",
-        "2050": "earth_ssp245_2050.json.gz",
-        "2070": "earth_ssp245_2070.json.gz",
-        "2090": "earth_ssp245_2090.json.gz"
+        "2030": "earth_ssp245_2030.json",
+        "2050": "earth_ssp245_2050.json",
+        "2070": "earth_ssp245_2070.json",
+        "2090": "earth_ssp245_2090.json"
       }
     },
     {
       "id": "ssp585",
       "label": "SSP5-8.5 · high emissions",
+      "short": "High emissions",
+      "code": "SSP5-8.5",
       "years": [
         2030,
         2050,
@@ -533,10 +537,10 @@
         2090
       ],
       "files": {
-        "2030": "earth_ssp585_2030.json.gz",
-        "2050": "earth_ssp585_2050.json.gz",
-        "2070": "earth_ssp585_2070.json.gz",
-        "2090": "earth_ssp585_2090.json.gz"
+        "2030": "earth_ssp585_2030.json",
+        "2050": "earth_ssp585_2050.json",
+        "2070": "earth_ssp585_2070.json",
+        "2090": "earth_ssp585_2090.json"
       }
     }
   ],
@@ -555,15 +559,15 @@
   ],
   "files": {
     "earth": {
-      "now": "earth.json.gz",
-      "2030": "earth_ssp245_2030.json.gz",
-      "2050": "earth_ssp245_2050.json.gz",
-      "2070": "earth_ssp245_2070.json.gz",
-      "2090": "earth_ssp245_2090.json.gz"
+      "now": "earth.json",
+      "2030": "earth_ssp245_2030.json",
+      "2050": "earth_ssp245_2050.json",
+      "2070": "earth_ssp245_2070.json",
+      "2090": "earth_ssp245_2090.json"
     },
-    "mars": "mars.json.gz"
+    "mars": "mars.json"
   },
-  "compression": "gzip",
+  "compression": "none",
   "dry_bare_rule": "aridity index <= 0.2 (arid + hyper-arid, Science), not ice or water",
   "dry_land": {
     "has_aridity": true,

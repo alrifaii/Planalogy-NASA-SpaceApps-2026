@@ -190,7 +190,7 @@ def test_grid_files_need_one_grid_per_folder(grid50):
 def test_export_compresses_only_over_budget(grid50, tmp_path, monkeypatch):
     plain = we.export(grid50, tmp_path / "plain", calibrate=False)
     assert plain["compression"] == "none" and plain["files"]["mars"] == "mars.json"
-    monkeypatch.setattr(we, "SIZE_BUDGET", 0)
+    monkeypatch.setattr(we, "FILE_BUDGET", 0)
     _write(grid50 / "earth_50km_2050.csv", _earth_rows_50km(swing_shift=30))
     m = we.export(grid50, tmp_path / "gz", calibrate=False)
     assert m["compression"] == "gzip" and m["files"]["earth"] == {"now": "earth.json.gz", "2050": "earth_2050.json.gz"}

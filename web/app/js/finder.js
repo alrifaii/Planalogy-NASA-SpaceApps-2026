@@ -46,13 +46,20 @@ const rgba = c => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${c[3].toFixed(3)})`
 
 TT.pages.finder = function(root){
   const C = TT.Caps, S = TT.Store;
-  const st = {m:null, target:'gale', custom:null, preset:null, year:'now', dry:true, hyper:false, cw:{}, fw:Object.assign({}, DEFAULT_FW),
-              req:[], reqF:[], res:null, sims:null, sel:null, view:'earth', ai:null, busy:false, picking:false};
-  let g3 = null, dead = false, ctrl = null;
-  const simCache = new Map();
+  const st = {m:null, mode: TT.lsGet('planalogy.mode', 'simple') === 'advanced' ? 'advanced' : 'simple', scenario:null,
+              target:'gale', custom:null, preset:null, lastPreset:null, year:'now', dry:true, hyper:false, cw:{}, fw:Object.assign({}, DEFAULT_FW),
+              req:[], reqF:[], res:null, sims:null, sel:null, view:'earth', ai:null, busy:false, picking:false, focusKey:null};
+  let g3 = null, gm = null, dead = false, ctrl = null, playT = null;
+  const simCache = new Map();  // a few recent (target, scenario, year) similarity tables
+  const mainGlobe = () => (st.view === 'mars' && gm) ? gm : g3;
 
   /* skeleton (reuses Explore's layout classes) */
-  const cv = h('canvas', {class:'view grab', role:'application', 'aria-label':'Globe with analog scores. Arrow keys rotate, plus and minus zoom.'});
+  const cv = h('canvas', {class:'view grab', role:'application', 'aria-label':'Earth globe with analog scores. Arrow keys rotate, plus and minus zoom.'});
+  const cvM = h('canvas', {class:'view grab', role:'application', 'aria-label':'Mars globe with the target. Arrow keys rotate.'});
+  // dual view: the main globe fills the stage, the other planet sits in a corner; they swap with an animation
+  const wrapE = h('div', {class:'f-globe main'}, cv), wrapM = h('div', {class:'f-globe mini'}, cvM);
+  const miniLabel = h('span', {class:'f-mini-label'});
+  const miniHit = h('button', {class:'f-mini-hit', type:'button', onclick: () => setView(st.view === 'earth' ? 'mars' : 'earth')}, miniLabel);
   const flat = h('canvas', {class:'view', style:{display:'none'}, 'aria-hidden':'true'});
   const ex = h('div', {class:'explore finder'});
   const leftP = h('aside', {class:'glass panel-l', 'aria-label':'Mission and weights'});
@@ -64,9 +71,10 @@ TT.pages.finder = function(root){
   const bL = h('button', {class:'btn sm', type:'button', onclick: () => sheet('l')}, TT.icon('filter'), 'Mission');
   const bR = h('button', {class:'btn sm', type:'button', onclick: () => sheet('r')}, TT.icon('list'), 'Sites');
   const dock = h('div', {class:'glass dock', role:'toolbar', 'aria-label':'Globe controls'},
-    mkb('plus', 'Zoom in', () => g3 && g3.zoomBy(.7)), mkb('minus', 'Zoom out', () => g3 && g3.zoomBy(1.4)),
+    mkb('plus', 'Zoom in', () => mainGlobe() && mainGlobe().zoomBy(.7)), mkb('minus', 'Zoom out', () => mainGlobe() && mainGlobe().zoomBy(1.4)),
     h('span', {class:'div'}), bView, h('span', {class:'div'}), legend, h('span', {class:'sheet-btns'}, bL, bR));
-  ex.append(cv, flat, leftP, rightP, dock, status);
+  ex.append(wrapE, wrapM, miniHit, flat, leftP, rightP, dock, status);
+  ex.classList.toggle('simple', st.mode === 'simple');
   root.appendChild(ex);
   const sheet = w => { leftP.classList.toggle('open', w === 'l' && !leftP.classList.contains('open')); rightP.classList.toggle('open', w === 'r' && !rightP.classList.contains('open')); };
 
@@ -89,17 +97,22 @@ TT.pages.finder = function(root){
   const dryLabel = h('span', null, 'Dry, bare land only');
   const hyperRow = h('label', {class:'f-switch', for:'f-hyper', hidden:true, style:{marginTop:'8px'}}, hyperInp, h('span', null, 'Hyper-arid only (aridity < 0.05)'));
   const yearSec = h('div', {class:'panel-sec', hidden:true});
-  const yearSeg = h('div', {class:'seg f-seg', role:'radiogroup', 'aria-label':'Year'});
-  yearSec.append(h('h4', null, 'Year'), yearSeg);
+  const scenSeg = h('div', {class:'seg f-seg', role:'radiogroup', 'aria-label':'Climate scenario'});
+  const playBtn = h('button', {class:'btn sm f-play', type:'button', 'aria-label':'Play the years', title:'Play the years', onclick: () => togglePlay()}, '▶');
+  const yearRange = h('input', {type:'range', class:'f-range', min:'0', max:'0', step:'1', value:'0', 'aria-label':'Year',
+    oninput: e => { stopPlay(); setYearIdx(+e.target.value); }});
+  const yearVal = h('span', {class:'mono f-year'}), yearNote = h('p', {class:'tiny muted f-year-note'});
+  yearSec.append(h('h4', null, 'Climate timeline'), scenSeg, h('div', {class:'f-yearrow'}, playBtn, yearRange, yearVal), yearNote);
+  const modeSeg = h('div', {class:'seg f-mode', role:'radiogroup', 'aria-label':'View'});
   leftP.append(
-    h('div', {class:'panel-head'}, h('h2', {style:{fontSize:'1.05rem'}}, 'Analog Finder'), h('button', {class:'btn ghost sm icon sheet-close', type:'button', 'aria-label':'Close', html:TT.icons.close, onclick: () => sheet(null)})),
+    h('div', {class:'panel-head'}, h('h2', {style:{fontSize:'1.05rem'}}, 'Analog Finder'), modeSeg, h('button', {class:'btn ghost sm icon sheet-close', type:'button', 'aria-label':'Close', html:TT.icons.close, onclick: () => sheet(null)})),
     h('div', {class:'panel-body'},
-      h('div', {class:'panel-sec'}, h('h4', null, 'Mars target'), targetSeg, pickBtn, myPts, customBox),
+      h('div', {class:'panel-sec'}, h('h4', null, 'Mars target'), targetSeg, pickBtn, h('div', {class:'adv'}, myPts), customBox),
       h('div', {class:'panel-sec'}, h('h4', null, 'Mission'), presetBox, verdict),
-      h('div', {class:'panel-sec'}, h('h4', null, 'Your own mission'), aiBox, aiOff),
-      h('div', {class:'panel-sec'}, h('h4', null, 'Weights'), sliders),
-      h('div', {class:'panel-sec'}, h('label', {class:'f-switch', for:'f-dry'}, dryInp, dryLabel), hyperRow),
-      yearSec));
+      yearSec,
+      h('div', {class:'panel-sec adv'}, h('h4', null, 'Your own mission'), aiBox, aiOff),
+      h('div', {class:'panel-sec adv'}, h('h4', null, 'Weights'), sliders),
+      h('div', {class:'panel-sec adv'}, h('label', {class:'f-switch', for:'f-dry'}, dryInp, dryLabel), hyperRow)));
 
   /* ---------- right panel ---------- */
   const rHead = h('div', {class:'panel-head'});
@@ -108,10 +121,14 @@ TT.pages.finder = function(root){
 
   /* ---------- globe ---------- */
   if (TT.webgl) g3 = TT.createGlobe(cv, {body:'earth', markerPx:26, dist:2.9,
-    onPick: it => { if (it.body === 'earth') select(it.id, true); },
-    onHover: () => {}, onBlank: () => {}, onPin: (lat, lon) => { if (st.picking) pickAt(lat, lon); }});
-  if (g3){ g3.setBody('earth'); g3.focus(25, 60, {dur:0}); }
-  else { cv.style.display = 'none'; flat.style.display = ''; }
+    onPick: it => { if (it.body === 'earth') select(it.id, true); }, onHover: () => {}, onBlank: () => {}});
+  if (g3){
+    g3.setBody('earth'); g3.focus(25, 60, {dur:0});
+    gm = TT.createGlobe(cvM, {body:'mars', markerPx:22, dist:3.1,
+      onPick: () => {}, onHover: () => {}, onBlank: () => {}, onPin: (lat, lon) => { if (st.picking) pickAt(lat, lon); }});
+    if (gm){ gm.setBody('mars'); gm.focus(0, 140, {dur:0}); }
+  } else { wrapE.style.display = 'none'; flat.style.display = ''; }
+  if (!gm){ wrapM.hidden = true; miniHit.hidden = true; }
 
   /* ---------- state helpers ---------- */
   const cats = () => st.m.categories;
@@ -119,7 +136,7 @@ TT.pages.finder = function(root){
   const target = () => st.target === 'custom' ? st.custom : presetTarget();
   const targetName = () => st.target === 'custom' ? st.custom.name : presetTarget().name;
   function applyPreset(p){
-    st.preset = p.id; st.ai = null;
+    st.preset = p.id; st.lastPreset = p.id; st.ai = null;
     if (st.target !== 'custom') st.target = p.target;
     const mx = Math.max(...Object.values(p.category_weights));
     st.cw = {}; cats().forEach(c => { st.cw[c.id] = mx > 0 ? (p.category_weights[c.id] || 0) * 5 / mx : 0; });
@@ -140,12 +157,50 @@ TT.pages.finder = function(root){
     return cw;
   }
 
+  const scen = () => (st.m.scenarios || []).find(s => s.id === st.scenario) || null;
   async function earthTable(year){
     const base = await load(st.m.files.earth.now);
     if (year === 'now') return base;
-    const key = 'earth@' + year;
-    if (!cache[key]) cache[key] = load(st.m.files.earth[year]).then(yt => PS.earthForYear(base, yt));
-    return cache[key];
+    const sc = scen();
+    if (!sc){
+      const key = 'earth@' + year;
+      if (!cache[key]) cache[key] = load(st.m.files.earth[year]).then(yt => PS.earthForYear(base, yt));
+      return cache[key];
+    }
+    const snap = y => { const k = 'earth@' + sc.id + '@' + y; if (!cache[k]) cache[k] = load(sc.files[String(y)]).then(t => PS.earthForYear(base, t)); return cache[k]; };
+    if (sc.files[String(year)]) return snap(year);
+    const ys = sc.years, lo = ys.filter(y => y < year).pop(), hi = ys.find(y => y > year);
+    if (lo == null || hi == null) return snap(lo != null ? lo : hi);
+    const [a, b] = await Promise.all([snap(lo), snap(hi)]);
+    return PS.blendEarth(st.m, a, b, (year - lo) / (hi - lo));  // between projections: linear, not cached (memory)
+  }
+  /* years on the slider: today, then every year from the first to the last projection */
+  function yearList(){
+    const sc = scen();
+    if (!sc) return st.m.years;
+    const out = ['now']; for (let y = sc.years[0]; y <= sc.years[sc.years.length - 1]; y++) out.push(y);
+    return out;
+  }
+  function yearCaption(){
+    if (st.year === 'now') return 'Today: observed climate (1970–2000 average).';
+    const sc = scen(); if (!sc) return 'Projected climate.';
+    const short = (sc.short ? sc.short + ', ' : '') + (sc.code || sc.label.split(' · ')[0]);
+    if (sc.years.includes(st.year)) return 'Climate projection ' + short + ' (CMIP6, multi-model mean).';
+    const lo = sc.years.filter(y => y < st.year).pop(), hi = sc.years.find(y => y > st.year);
+    return 'Between the ' + lo + ' and ' + hi + ' projections (' + short + '), interpolated linearly.';
+  }
+  function setYearIdx(i){
+    const ys = yearList(); st.year = ys[Math.max(0, Math.min(ys.length - 1, i))];
+    yearVal.textContent = st.year === 'now' ? 'Today' : String(st.year); yearNote.textContent = yearCaption();
+    rescoreSoon();
+  }
+  function stopPlay(){ if (playT){ clearInterval(playT); playT = null; } playBtn.textContent = '▶'; playBtn.setAttribute('aria-label', 'Play the years'); }
+  function togglePlay(){
+    if (playT) return stopPlay();
+    const ys = yearList(); let i = ys.indexOf(st.year); if (i < 0 || i >= ys.length - 1) i = 0;
+    playBtn.textContent = '❚❚'; playBtn.setAttribute('aria-label', 'Pause');
+    setYearIdx(i); yearRange.value = String(i);
+    playT = setInterval(() => { i++; if (i >= ys.length){ stopPlay(); return; } yearRange.value = String(i); setYearIdx(i); if (i === ys.length - 1) stopPlay(); }, 160);
   }
 
   async function rescore(){
@@ -154,13 +209,13 @@ TT.pages.finder = function(root){
     try {
       const earth = await earthTable(y);
       if (dead || y !== st.year) return;
-      const key = tk + '@' + y;
-      if (!simCache.has(key)) simCache.set(key, PS.similarities(st.m, earth, t.values));
+      const key = tk + '@' + (st.scenario || '') + '@' + y;
+      if (!simCache.has(key)){ simCache.set(key, PS.similarities(st.m, earth, t.values)); while (simCache.size > 6) simCache.delete(simCache.keys().next().value); }
       st.sims = simCache.get(key);
       st.res = PS.scoreCells(st.m, earth, st.sims, {categoryWeights: effectiveCW(), featureWeights: effectiveFW(),
         requirements: st.req, requiredFeatures: st.reqF.filter(f => !st.sims.targetMissing.includes(f)), onlyDryBare: st.dry, hyperArid: st.hyper});
       if (st.sel && !st.res.ranked.some(x => x.id === st.sel)) st.sel = null;
-      paintOverlay(); drawRight(); pushMarkers(); drawStatus(); drawCustom(); drawSliders();
+      paintOverlay(); drawRight(); pushMarkers(); drawStatus(); drawCustom(); if (st.mode === 'advanced') drawSliders();
     } catch(e){ console.error(e); status.textContent = /positive weight/.test(e.message) ? 'Give at least one available category a weight.' : 'Could not compute scores.'; }
   }
   const rescoreSoon = TT.debounce(rescore, 60);
@@ -202,31 +257,43 @@ TT.pages.finder = function(root){
   /* ---------- markers ---------- */
   function pushMarkers(){
     if (!g3 || !st.res) return;
-    const t = target(), items = [];
-    if (st.view === 'earth') st.res.ranked.slice(0, TOP).forEach(it => items.push({id: it.id, lat: it.lat, lon: it.lon, body:'earth', kind:'analog'}));
-    else {
-      items.push({id:'target', lat:t.lat, lon:t.lon, body:'mars', kind:'landing'});
-      marsPins().forEach(p => items.push({id: p.id, lat: p.lat, lon: p.lon, body:'mars', kind:'user', dim: true}));
-    }
-    g3.setMarkers(items); g3.setSelection(st.view === 'earth' ? st.sel : 'target', []);
+    g3.setMarkers(st.res.ranked.slice(0, TOP).map(it => ({id: it.id, lat: it.lat, lon: it.lon, body:'earth', kind:'analog'})));
+    g3.setSelection(st.sel, []);
+    if (!gm) return;
+    const t = target(), items = [{id:'target', lat:t.lat, lon:t.lon, body:'mars', kind:'landing'}];
+    if (st.mode === 'advanced') marsPins().forEach(p => items.push({id: p.id, lat: p.lat, lon: p.lon, body:'mars', kind:'user', dim: true}));
+    gm.setMarkers(items); gm.setSelection('target', []);  // pulsing ring on the target
+    const k = t.lat + ',' + t.lon;
+    if (k !== st.focusKey){ st.focusKey = k; gm.focus(t.lat, t.lon, {dist: st.view === 'mars' ? 2.3 : 3.1}); }
+    drawMini();
+  }
+  function drawMini(){
+    if (!st.m) return;
+    TT.clear(miniLabel);
+    miniLabel.append(st.view === 'earth' ? 'Mars · ' + targetName().split(' (')[0] : 'Earth · analog heat map', h('span', {class:'f-mini-go', 'aria-hidden':'true'}, '⤢'));
+    miniHit.setAttribute('aria-label', st.view === 'earth' ? 'Show Mars full size' : 'Show Earth full size');
   }
   function setView(v){
     st.view = v; bView.textContent = v === 'earth' ? 'Show target on Mars' : 'Back to Earth';
     if (v === 'earth' && st.picking) setPicking(false);
-    if (!g3){ if (v === 'mars'){ TT.toast('3D globe unavailable: target is ' + targetName() + '.'); st.view = 'earth'; } return; }
-    g3.setBody(v); pushMarkers();
-    if (v === 'mars'){ const t = target(); g3.focus(t.lat, t.lon, {dist:2.7}); }
-    else if (st.sel){ const it = st.res.ranked.find(x => x.id === st.sel); it && g3.focus(it.lat, it.lon, {dist:2.1}); }
-    drawStatus();
+    if (!g3 || !gm){ if (v === 'mars'){ TT.toast('3D globe unavailable: target is ' + targetName() + '.'); st.view = 'earth'; } return; }
+    const marsMain = v === 'mars', t = target();
+    // swap the two stages (CSS animates size and position) while each camera eases to its new distance
+    wrapE.className = 'f-globe ' + (marsMain ? 'mini' : 'main'); wrapM.className = 'f-globe ' + (marsMain ? 'main' : 'mini');
+    ex.classList.toggle('mars-main', marsMain);
+    gm.focus(t.lat, t.lon, {dist: marsMain ? 2.3 : 3.1, dur: 900});
+    if (marsMain) g3.focus(g3.view.lat, g3.view.lon, {dist: 3.1, dur: 900});
+    else { const it = st.sel && st.res && st.res.ranked.find(x => x.id === st.sel); g3.focus(it ? it.lat : g3.view.lat, it ? it.lon : g3.view.lon, {dist: it ? 2.1 : 2.9, dur: 900}); }
+    pushMarkers(); drawStatus();
   }
 
   /* ---------- free Mars target ---------- */
   const marsPins = () => (S.pins || []).filter(p => p.body === 'mars');
   function setPicking(on){
-    st.picking = on && !!g3; pickBtn.setAttribute('aria-pressed', st.picking);
-    if (!g3){ TT.toast('Picking needs the 3D globe.'); return; }
+    st.picking = on && !!gm; pickBtn.setAttribute('aria-pressed', st.picking);
+    if (!gm){ TT.toast('Picking needs the 3D globe.'); return; }
     if (st.picking && st.view !== 'mars') setView('mars');
-    g3.setPinMode(st.picking); drawStatus();
+    gm.setPinMode(st.picking); drawStatus();
   }
   async function pickAt(lat, lon, label){
     try {
@@ -237,7 +304,7 @@ TT.pages.finder = function(root){
       st.custom = {key:'custom', lat:cell.lat, lon:cell.lon, values:cell.values, name: label || ('Mars ' + TT.fmtCoord(cell.lat, cell.lon, 1))};
       st.target = 'custom'; setPicking(false);
       if (st.preset){ const p = st.m.presets.find(x => x.id === st.preset); p && applyPreset(p); }
-      drawLeft(); await rescore(); pushMarkers(); g3 && g3.focus(cell.lat, cell.lon, {dist:2.7});
+      drawLeft(); await rescore(); pushMarkers();
     } catch(e){ console.error(e); TT.toast('Could not load Mars data.', true); }
   }
 
@@ -291,16 +358,38 @@ TT.pages.finder = function(root){
     });
   }
   function drawYears(){
-    const ys = st.m.years; yearSec.hidden = ys.length < 2; TT.clear(yearSeg);
-    ys.forEach(y => yearSeg.appendChild(h('button', {type:'button', role:'radio', 'aria-checked': String(y) === String(st.year), onclick: () => { st.year = String(y); drawYears(); rescore(); }}, y === 'now' ? 'Today' : String(y))));
+    const ys = yearList(); yearSec.hidden = ys.length < 2;
+    const scs = st.m.scenarios || [];
+    TT.clear(scenSeg); scenSeg.hidden = scs.length < 2;
+    scs.forEach(s => scenSeg.appendChild(h('button', {type:'button', role:'radio', 'aria-checked': s.id === st.scenario, title: s.label,
+      onclick: () => { st.scenario = s.id; drawYears(); rescore(); }}, h('span', {class:'f-scen'}, h('b', null, s.short || s.id), h('span', {class:'tiny muted mono'}, s.code || '')))));
+    if (!ys.includes(st.year)) st.year = 'now';
+    yearRange.max = String(ys.length - 1); yearRange.value = String(Math.max(0, ys.indexOf(st.year)));
+    yearVal.textContent = st.year === 'now' ? 'Today' : String(st.year); yearNote.textContent = yearCaption();
   }
+  function drawMode(){
+    TT.clear(modeSeg);
+    [['simple', 'Simple'], ['advanced', 'Advanced']].forEach(([k, l]) => modeSeg.appendChild(h('button', {type:'button', role:'radio', 'aria-checked': st.mode === k, onclick: () => setMode(k)}, l)));
+  }
+  /* simple: target, mission scenarios and the climate timeline; advanced adds weights, the AI mission and land filters */
+  function setMode(m){
+    if (m === st.mode) return;
+    st.mode = m; TT.lsSet('planalogy.mode', m); ex.classList.toggle('simple', m === 'simple');
+    if (m === 'simple'){
+      if (!st.preset) applyPreset(st.m.presets.find(p => p.id === st.lastPreset) || st.m.presets[0]);
+      st.dry = true; st.hyper = false; dryInp.checked = true; hyperInp.checked = false; if (st.picking) setPicking(false);
+    }
+    drawLeft(); rescore();
+  }
+  const onMode = e => { if (st.m && e.detail) setMode(e.detail); };
+  window.addEventListener('planalogy-mode', onMode);
   function drawAI(){ const on = !!(C && C.sample); aiBox.hidden = !on; aiOff.hidden = on; }
   function drawDry(){ // with an aridity index (climate data) the rule is Science's: aridity <= 0.20, plus a hyper-arid option
     const d = st.m.dry_land || {};
     dryLabel.textContent = d.has_aridity ? 'Dry land only (aridity ≤ ' + d.max_aridity + ')' : 'Dry, bare land only';
     hyperRow.hidden = !d.has_aridity;
   }
-  function drawLeft(){ drawTargets(); drawCustom(); drawPresets(); drawSliders(); drawYears(); drawDry(); drawAI(); }
+  function drawLeft(){ drawMode(); drawTargets(); drawCustom(); drawPresets(); drawSliders(); drawYears(); drawDry(); drawAI(); }
 
   /* ---------- right panel ---------- */
   function drawStatus(){
@@ -370,7 +459,7 @@ TT.pages.finder = function(root){
     st.sel = id; const it = st.res && st.res.ranked.find(x => x.id === id);
     if (st.view !== 'earth') setView('earth');
     pushMarkers(); drawRight();
-    if (fly && g3 && it) g3.focus(it.lat, it.lon, {dist:2.1});
+    if (fly && g3 && it) g3.focus(it.lat, it.lon, {dist:2.1, dur: st.view === 'earth' ? 1100 : 900});
     if (window.innerWidth <= 900) rightP.classList.add('open');
   }
 
@@ -418,7 +507,7 @@ TT.pages.finder = function(root){
   rHead.append(h('h2', {style:{fontSize:'1.05rem'}}, 'Best analogs'));
   rBody.append(h('p', {class:'muted small'}, 'Loading…'));
   load('manifest.json').then(m => {
-    if (dead) return; st.m = m;
+    if (dead) return; st.m = m; st.scenario = m.scenario || null;
     applyPreset(m.presets[0]); drawLeft(); setView('earth'); rescore();
   }).catch(e => { console.error(e); TT.clear(rBody); rBody.append(h('p', {class:'muted small'}, 'Analog data could not be loaded.')); });
   const onResize = TT.debounce(() => { if (!g3 && st.res) drawFlat(); }, 150);
@@ -426,7 +515,7 @@ TT.pages.finder = function(root){
   const unStore = S.on ? S.on(() => { if (st.m) drawTargets(); }) : null;
 
   return {
-    destroy(){ dead = true; ctrl && ctrl.abort(); window.removeEventListener('resize', onResize); typeof unStore === 'function' && unStore(); g3 && g3.dispose(); },
+    destroy(){ dead = true; stopPlay(); ctrl && ctrl.abort(); window.removeEventListener('resize', onResize); window.removeEventListener('planalogy-mode', onMode); typeof unStore === 'function' && unStore(); g3 && g3.dispose(); gm && gm.dispose(); },
     refresh(){ if (st.m){ drawAI(); drawTargets(); } }
   };
 };

@@ -1,5 +1,5 @@
 """
-Planeology - NASA Space Apps Challenge 2026
+Planalogy - NASA Space Apps Challenge 2026
 
 Module: Engine Service
 Purpose: Connect the analogue engine (similarity model) to the app. Run a
@@ -196,7 +196,7 @@ def run_preset(
     }
     lat, lon = CELLS[preset["target"]]
     return {
-        "project": "Planeology",
+        "project": "Planalogy",
         "preset": {k: preset[k] for k in ("id", "name", "mission", "why")},
         "target": {"name": preset["target"], "body": "Mars", "lat": lat, "lon": lon},
         "calibration": info,

@@ -47,6 +47,30 @@ python -m backend.engine_service --years
 This writes `data/results/<preset>_years.json` with the sites gaining or
 losing analogy.
 
+## Web app (Planalogy)
+
+`web/app/` is the static web app. It has the 3D globe and an **Analog
+Finder**: pick a Mars target, choose a mission preset or set weights (by hand
+or by describing the mission to Claude), and every dry, bare 1° Earth cell is
+re-ranked in the browser. A heat map, the top sites and site cards update
+instantly.
+
+The browser does not run the engine. `backend/web_export.py` precomputes
+each cell's similarity to each target, and `web/app/js/scoring.js` only
+applies the weights. A test checks that it gives exactly the engine's ranking.
+To refresh the data after new grid files, including yearly files for the
+year slider, run:
+
+```bash
+python -m backend.web_export
+```
+
+The app is published as a Claude artifact. Any static host also works:
+
+```bash
+python -m http.server --directory web/app
+```
+
 ## Tests
 
 ```bash

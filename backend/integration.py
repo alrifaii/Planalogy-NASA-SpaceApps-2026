@@ -1,6 +1,6 @@
 
 """
-Planeology - NASA Space Apps Challenge 2026
+Planalogy - NASA Space Apps Challenge 2026
 
 Module: Integration
 Purpose: Connect scientific datasets, geospatial
@@ -77,7 +77,7 @@ def run_assessment(
     )
 
     return {
-        "project": "Planeology",
+        "project": "Planalogy",
         "target_location": target["location_name"],
         "target_body": target["planetary_body"],
         "target_data_source": target["data_source"],
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         similarity_scores=demo_scores
     )
 
-    print("Planeology Integration Engine started!")
+    print("Planalogy Integration Engine started!")
 
     print(f"\nTarget: {results['target_location']}")
     print(f"Planetary body: {results['target_body']}")

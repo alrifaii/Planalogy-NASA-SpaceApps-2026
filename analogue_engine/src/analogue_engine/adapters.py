@@ -1,4 +1,4 @@
-"""Bridge to the Planeology backend (branch `backend`, module `integration`).
+"""Bridge to the Planalogy backend (branch `backend`, module `integration`).
 
 The backend keeps one row per location with one column per parameter (a
 "wide" table, e.g. ``data/sample_locations.csv``) and its

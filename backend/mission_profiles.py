@@ -1,6 +1,6 @@
 
 """
-Planeology - NASA Space Apps Challenge 2026
+Planalogy - NASA Space Apps Challenge 2026
 
 Module: Mission Profiles
 Purpose: Define environmental priorities for lunar

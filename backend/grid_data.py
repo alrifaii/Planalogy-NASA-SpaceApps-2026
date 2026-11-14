@@ -1,5 +1,5 @@
 """
-Planeology - NASA Space Apps Challenge 2026
+Planalogy - NASA Space Apps Challenge 2026
 
 Module: Grid Data
 Purpose: Adapter for the Data team's 1x1 degree grid (earth_1deg.csv / mars_1deg.csv).

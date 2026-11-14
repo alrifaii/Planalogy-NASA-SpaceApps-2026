@@ -1,6 +1,6 @@
 
 """
-Planeology - NASA Space Apps Challenge 2026
+Planalogy - NASA Space Apps Challenge 2026
 
 Module: Mission Intelligence Engine
 Purpose: Interpret environmental similarity scores

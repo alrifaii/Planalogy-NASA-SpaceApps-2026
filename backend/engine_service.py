@@ -83,10 +83,19 @@ def grid_files(data_dir: Path) -> tuple[str, str]:
 
 @lru_cache(maxsize=8)
 def load_grid(data_dir: str, earth_file: str | None = None) -> dict[str, Any]:
-    """Load and prepare the grid once per (folder, Earth file); about 3 s at 1 degree."""
+    """Load and prepare the grid once per (folder, Earth file); about 3 s at 1 degree.
+
+    Yearly files that hold only climate columns are merged onto the present
+    grid with the delta method; the earliest yearly file is the reference
+    (the model's present). See backend/grid_data.py.
+    """
     path = Path(data_dir)
     earth, mars = grid_files(path)
-    return g.build(path, earth_file or earth, mars)
+    years = yearly_files(path)
+    reference = years[0][1] if years else None
+    if earth_file is None or earth_file == earth:
+        return g.build(path, earth, mars, reference_file=reference)
+    return g.build(path, earth_file, mars, base_file=earth, reference_file=reference)
 
 
 def yearly_files(data_dir: Path) -> list[tuple[int, str]]:

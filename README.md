@@ -47,6 +47,19 @@ python -m backend.engine_service --years
 This writes `data/results/<preset>_years.json` with the sites gaining or
 losing analogy.
 
+Yearly files can be **climate projections only** (`lat`, `lon`,
+`air_temp_swing_K`, `air_temp_min_K`, `precipitation_mm_yr`,
+`aridity_index`, ... without terrain columns). They are merged onto the
+present grid as follows:
+- **Ground temperatures (delta method):** today's ground temperature plus the
+  projected change in air temperature since the earliest yearly file, which
+  acts as the model's present.
+- **Dry land:** follows Science's aridity rule. It counts as dry when
+  `aridity_index` ≤ 0.20, and the app adds a "hyper-arid only" option
+  (< 0.05).
+- **Not projected:** terrain, rock, craters, albedo, thermal inertia and
+  ground ice keep their present values.
+
 **Other resolutions (e.g. 50 km cells):** nothing assumes 1° cells. Put one
 `earth_<name>.csv` and one `mars_<name>.csv` (same columns) in a folder, for
 example `data/grid_50km/` with Earth at 0.45° and Mars at 0.84°, and pass

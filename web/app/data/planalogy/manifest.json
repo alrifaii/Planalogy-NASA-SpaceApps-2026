@@ -418,6 +418,11 @@
   },
   "compression": "none",
   "dry_bare_rule": "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)",
+  "dry_land": {
+    "has_aridity": false,
+    "max_aridity": 0.2,
+    "hyper_arid_below": 0.05
+  },
   "thresholds": {
     "strong_at_least": 75,
     "weak_at_most": 40

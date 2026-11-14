@@ -31,6 +31,9 @@ Output (default web/app/data/planalogy/, read by the Planalogy web app):
   earth.json[.gz]            every Earth land cell: id, lat, lon, feature values, dry_bare flag
   earth_<year>.json[.gz]     per year: id + only the climate-dependent columns (YEAR_COLUMNS);
                              terrain, rock type and craters come from earth.json
+When the data has an aridity index (climate projections), earth files also
+carry aridity_index so the browser can switch between dry land (<= 0.20) and
+hyper-arid land (< 0.05); without it the files are exactly as before.
   mars.json[.gz]             every Mars cell: lat, lon, feature values
 
     python -m backend.web_export [--data data/grid_1deg] [--out web/app/data/planalogy]
@@ -93,14 +96,15 @@ def _site(planet: str, data: dict, key: tuple[float, float]) -> dict:
                        spec=data[f"{planet}_spec"], support=data["support"])
 
 
-def _earth_rows(data: dict) -> list[list]:
-    """Every Earth land cell, with the dry/bare pre-filter as a flag (not a cut)."""
+def _earth_rows(data: dict, with_aridity: bool = False) -> list[list]:
+    """Every Earth land cell, with the dry-land pre-filter as a flag (not a cut)."""
     rows = []
     for key, r in data["earth"].items():
         if r.get("is_land") != "1.0":
             continue
         site = _site("earth", data, key)
-        rows.append([site["id"], key[0], key[1]] + _values(site) + [g.passes_earth_filter(r)])
+        row = [site["id"], key[0], key[1]] + _values(site) + [g.passes_earth_filter(r)]
+        rows.append(row + [g._num(r, "aridity_index")] if with_aridity else row)
     return rows
 
 
@@ -144,16 +148,19 @@ def export(data_dir: Path, out_dir: Path, calibrate: bool = True, compress: bool
     base = es.load_grid(str(data_dir))
 
     payloads: dict[str, dict] = {"mars": {"columns": ["lat", "lon"] + FEATURES, "rows": _mars_rows(base)}}
-    full_cols = ["id", "lat", "lon"] + FEATURES + ["dry_bare"]
+    aridity = base["has_aridity"]
+    extra = ["aridity_index"] if aridity else []
+    full_cols = ["id", "lat", "lon"] + FEATURES + ["dry_bare"] + extra
+    year_cols = ["id"] + YEAR_COLUMNS + extra
     earth_names: dict[str, str] = {}
     for item in years:
         if item is None:
-            name, payload = "earth", {"columns": full_cols, "rows": _earth_rows(base)}
+            name, payload = "earth", {"columns": full_cols, "rows": _earth_rows(base, aridity)}
         else:
             year, fname = item
-            rows = _earth_rows(es.load_grid(str(data_dir), fname))
-            keep = [full_cols.index(c) for c in ["id"] + YEAR_COLUMNS]
-            name, payload = f"earth_{year}", {"columns": ["id"] + YEAR_COLUMNS, "base": "earth.json",
+            rows = _earth_rows(es.load_grid(str(data_dir), fname), aridity)
+            keep = [full_cols.index(c) for c in year_cols]
+            name, payload = f"earth_{year}", {"columns": year_cols, "base": "earth.json",
                                               "rows": [[r[i] for i in keep] for r in rows]}
         payloads[name] = payload
         earth_names["now" if item is None else str(item[0])] = name
@@ -197,7 +204,10 @@ def export(data_dir: Path, out_dir: Path, calibrate: bool = True, compress: bool
         "year_columns": YEAR_COLUMNS,
         "files": files,
         "compression": "gzip" if use_gzip else "none",
-        "dry_bare_rule": "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)",
+        "dry_bare_rule": (f"aridity index <= {g.DRY_MAX_ARIDITY} (arid + hyper-arid, Science), not ice or water"
+                          if aridity else
+                          "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)"),
+        "dry_land": {"has_aridity": aridity, "max_aridity": g.DRY_MAX_ARIDITY, "hyper_arid_below": g.HYPER_ARID_BELOW},
         "thresholds": {"strong_at_least": 75, "weak_at_most": 40},
         "common_limitations": base["limitations"],
     }

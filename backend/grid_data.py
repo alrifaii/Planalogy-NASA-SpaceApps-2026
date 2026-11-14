@@ -34,8 +34,24 @@ Features (Science decisions; weights and scales are PROVISIONAL):
 * P5, P6, P7     not scored: P5 is a declared limitation, P6 has no Earth
                  dataset, and P7 has no Earth columns in this grid.
 
-Earth pre-filter ("dry, bare land", PROVISIONAL thresholds): is_land = 1,
-rock_group not ice/water, precipitation < 500 mm/yr, NDVI < 0.2 (or unknown).
+Earth pre-filter ("dry land"): is_land = 1 and rock_group not ice/water, then
+* with an aridity index (Science, Wojciech): aridity_index <= 0.20, i.e. UNEP
+  "arid" + "hyper-arid"; semi-arid land has too much vegetation and water to
+  look like Mars. Hyper-arid (< 0.05, e.g. Atacama) is the strictest option;
+* without one (the present grid has none): PROVISIONAL precipitation
+  < 500 mm/yr and NDVI < 0.2 (or unknown).
+
+Climate projections (year slider). A yearly file earth_<grid>_<year>.csv may
+hold only climate columns (no elevation_m): air temperatures, precipitation,
+aridity. It is merged onto the base Earth grid cell by cell:
+* ground temperatures by the DELTA METHOD: projections give AIR temperature,
+  P2 compares GROUND temperature, so
+      ground(year) = ground(today, MODIS) + [air(year) - air(reference)]
+  where the reference is the earliest yearly file (the model's present), so
+  the reference year reproduces today's ground values exactly;
+* precipitation and aridity are replaced by the projected values;
+* terrain, rock, craters, albedo, thermal inertia and ground ice keep their
+  present values (no projection yet; declared as a limitation).
 
 Resolution. Nothing here assumes 1-degree cells: the step and origin of each
 planet's grid are read from the data (GridSpec), the relief uses the adjacent
@@ -350,11 +366,80 @@ def _percentile(table: list[float], x: float | None) -> float | None:
     return bisect.bisect_right(table, x) / len(table)
 
 
-def passes_earth_filter(r: dict, max_precip: float = 500.0, max_ndvi: float = 0.2) -> bool:
+DRY_MAX_ARIDITY = 0.20  # Science: arid + hyper-arid (UNEP/IPCC classes)
+HYPER_ARID_BELOW = 0.05  # Science: the most Mars-like land (e.g. Atacama)
+
+
+def passes_earth_filter(r: dict, max_precip: float = 500.0, max_ndvi: float = 0.2,
+                        max_aridity: float = DRY_MAX_ARIDITY) -> bool:
+    """Dry land: aridity index <= max_aridity when known, else the provisional precipitation/NDVI rule."""
     if r.get("is_land") != "1.0" or r.get("rock_group") in ("ice", "water", ""):
         return False
+    aridity = _num(r, "aridity_index")
+    if aridity is not None:
+        return aridity <= max_aridity
     precip, ndvi = _num(r, "precipitation_mm_yr"), _num(r, "ndvi")
     return precip is not None and precip < max_precip and (ndvi is None or ndvi < max_ndvi)
+
+
+def is_hyper_arid(r: dict) -> bool:
+    """Dry land with aridity index below HYPER_ARID_BELOW (False when the index is unknown)."""
+    aridity = _num(r, "aridity_index")
+    return passes_earth_filter(r) and aridity is not None and aridity < HYPER_ARID_BELOW
+
+
+# ---------------------------------------------------------------- climate projections
+
+# ground column <- air column whose projected CHANGE is added (delta method)
+DELTA_COLUMNS = {"surface_temp_swing_K": "air_temp_swing_K", "surface_temp_min_K": "air_temp_min_K"}
+# columns taken as projected
+REPLACED_COLUMNS = ["precipitation_mm_yr", "aridity_index", "aridity_class"]
+PROJECTION_NOTE = (
+    "Future years: ground temperatures are today's values plus the projected change in air temperature "
+    "(delta method); terrain, rock, craters, albedo, thermal inertia and ground ice keep present values."
+)
+
+
+def is_projection(grid: dict) -> bool:
+    """A climate-only file (no terrain columns) to be merged onto the base grid."""
+    first = next(iter(grid.values()), {})
+    return "elevation_m" not in first
+
+
+def project(base: dict, proj: dict, ref: dict) -> dict:
+    """Base Earth grid with a climate projection applied (see the module docstring).
+
+    Cells the projection does not cover keep their terrain but lose the
+    climate-dependent values (missing, never guessed).
+    """
+    out = {}
+    for key, b in base.items():
+        row = dict(b)
+        p, r = proj.get(key), ref.get(key)
+        for col in REPLACED_COLUMNS:
+            if p is not None and col in p:
+                row[col] = p[col]
+            elif p is None:
+                row[col] = ""
+        for ground, air in DELTA_COLUMNS.items():
+            g0, a1, a0 = _num(b, ground), _num(p or {}, air), _num(r or {}, air)
+            if p is not None and air not in p:
+                continue  # this projection does not change that column
+            row[ground] = "" if None in (g0, a1, a0) else repr(g0 + (a1 - a0))
+        out[key] = row
+    return out
+
+
+def with_reference_aridity(base: dict, ref: dict) -> dict:
+    """Present grid + the reference file's aridity, so 'now' uses the same dry-land rule as the years."""
+    out = {}
+    for key, b in base.items():
+        row, r = dict(b), ref.get(key)
+        for col in ("aridity_index", "aridity_class"):
+            if r is not None and col in r:
+                row[col] = r[col]
+        out[key] = row
+    return out
 
 
 def cell_site(
@@ -396,13 +481,32 @@ def cell_site(
     }
 
 
-def build(data_dir: Path, earth_file: str = "earth_1deg.csv", mars_file: str = "mars_1deg.csv") -> dict[str, Any]:
+def build(
+    data_dir: Path,
+    earth_file: str = "earth_1deg.csv",
+    mars_file: str = "mars_1deg.csv",
+    *,
+    base_file: str | None = None,
+    reference_file: str | None = None,
+) -> dict[str, Any]:
     """Load both grids. ``earth_file`` selects a yearly Earth file for the year slider.
 
+    For a climate-only yearly file, pass the present Earth file as
+    ``base_file`` and the earliest yearly file as ``reference_file`` (delta
+    method). For the present grid, ``reference_file`` adds that file's
+    aridity so every year uses the same dry-land rule.
     Also returns each grid's GridSpec, the shared spatial-support label and
     the declared limitations for this resolution.
     """
     earth, mars = load_grid(data_dir / earth_file), load_grid(data_dir / mars_file)
+    ref = load_grid(data_dir / reference_file) if reference_file else None
+    projected = ref is not None and is_projection(ref)
+    if base_file is not None and is_projection(earth):
+        if ref is None:
+            raise ValueError(f"{earth_file} holds only climate columns: it needs a reference year for the delta method")
+        earth = project(load_grid(data_dir / base_file), earth, ref)
+    elif projected:
+        earth = with_reference_aridity(earth, ref)
     earth_spec, mars_spec = grid_spec("earth", earth), grid_spec("mars", mars)
     support = spatial_support(earth_spec, mars_spec)
     earth_ati, mars_ati = _percentile_table(earth, land_only=True), _percentile_table(mars, land_only=False)
@@ -410,4 +514,5 @@ def build(data_dir: Path, earth_file: str = "earth_1deg.csv", mars_file: str = "
                    for k, r in earth.items() if passes_earth_filter(r)]
     return {"earth": earth, "mars": mars, "earth_ati": earth_ati, "mars_ati": mars_ati, "earth_sites": earth_sites,
             "earth_spec": earth_spec, "mars_spec": mars_spec, "support": support,
-            "limitations": limitations(earth_spec, mars_spec)}
+            "limitations": limitations(earth_spec, mars_spec) + ([PROJECTION_NOTE] if projected else []),
+            "has_aridity": any(_num(r, "aridity_index") is not None for r in earth.values())}

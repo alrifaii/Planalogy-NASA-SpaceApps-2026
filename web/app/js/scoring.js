@@ -138,11 +138,17 @@
     (settings.requirements || []).forEach(r => required.add(r.feature));
     const reqs = settings.requirements || [];
     const onlyDry = settings.onlyDryBare !== false && cIndex.dry_bare !== undefined;
+    // hyper-arid only (Science: aridity index < 0.05, e.g. Atacama); needs the aridity column
+    const hyper = !!settings.hyperArid && cIndex.aridity_index !== undefined && cIndex.dry_bare !== undefined;
+    const hyperBelow = (manifest.dry_land && manifest.dry_land.hyper_arid_below) || 0.05;
     const ranked = [], partial = [], excluded = [];
     let skipped = 0;
 
     for (const row of earth.rows) {
       if (onlyDry && !row[cIndex.dry_bare]) { skipped++; continue; }
+      if (hyper && !(row[cIndex.dry_bare] && row[cIndex.aridity_index] !== null && row[cIndex.aridity_index] < hyperBelow)) {
+        skipped++; continue;
+      }
       const id = row[cIndex.id];
       const s = sims.by_id[id];
       if (!s) continue;

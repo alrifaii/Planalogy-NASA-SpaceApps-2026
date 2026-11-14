@@ -46,7 +46,7 @@ const rgba = c => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${c[3].toFixed(3)})`
 
 TT.pages.finder = function(root){
   const C = TT.Caps, S = TT.Store;
-  const st = {m:null, target:'gale', custom:null, preset:null, year:'now', dry:true, cw:{}, fw:Object.assign({}, DEFAULT_FW),
+  const st = {m:null, target:'gale', custom:null, preset:null, year:'now', dry:true, hyper:false, cw:{}, fw:Object.assign({}, DEFAULT_FW),
               req:[], reqF:[], res:null, sims:null, sel:null, view:'earth', ai:null, busy:false, picking:false};
   let g3 = null, dead = false, ctrl = null;
   const simCache = new Map();
@@ -84,7 +84,10 @@ TT.pages.finder = function(root){
   aiBox.append(aiIn, h('div', {class:'f-row'}, aiBtn), aiOut);
   const aiOff = h('p', {class:'tiny muted'}, 'AI weights need Claude access in this view.');
   const sliders = h('div', {class:'f-sliders'});
-  const dryInp = h('input', {type:'checkbox', id:'f-dry', checked:true, onchange: e => { st.dry = e.target.checked; rescore(); }});
+  const dryInp = h('input', {type:'checkbox', id:'f-dry', checked:true, onchange: e => { st.dry = e.target.checked; if (!st.dry){ st.hyper = false; hyperInp.checked = false; } rescore(); }});
+  const hyperInp = h('input', {type:'checkbox', id:'f-hyper', onchange: e => { st.hyper = e.target.checked; if (st.hyper){ st.dry = true; dryInp.checked = true; } rescore(); }});
+  const dryLabel = h('span', null, 'Dry, bare land only');
+  const hyperRow = h('label', {class:'f-switch', for:'f-hyper', hidden:true, style:{marginTop:'8px'}}, hyperInp, h('span', null, 'Hyper-arid only (aridity < 0.05)'));
   const yearSec = h('div', {class:'panel-sec', hidden:true});
   const yearSeg = h('div', {class:'seg f-seg', role:'radiogroup', 'aria-label':'Year'});
   yearSec.append(h('h4', null, 'Year'), yearSeg);
@@ -95,7 +98,7 @@ TT.pages.finder = function(root){
       h('div', {class:'panel-sec'}, h('h4', null, 'Mission'), presetBox, verdict),
       h('div', {class:'panel-sec'}, h('h4', null, 'Your own mission'), aiBox, aiOff),
       h('div', {class:'panel-sec'}, h('h4', null, 'Weights'), sliders),
-      h('div', {class:'panel-sec'}, h('label', {class:'f-switch', for:'f-dry'}, dryInp, h('span', null, 'Dry, bare land only'))),
+      h('div', {class:'panel-sec'}, h('label', {class:'f-switch', for:'f-dry'}, dryInp, dryLabel), hyperRow),
       yearSec));
 
   /* ---------- right panel ---------- */
@@ -155,7 +158,7 @@ TT.pages.finder = function(root){
       if (!simCache.has(key)) simCache.set(key, PS.similarities(st.m, earth, t.values));
       st.sims = simCache.get(key);
       st.res = PS.scoreCells(st.m, earth, st.sims, {categoryWeights: effectiveCW(), featureWeights: effectiveFW(),
-        requirements: st.req, requiredFeatures: st.reqF.filter(f => !st.sims.targetMissing.includes(f)), onlyDryBare: st.dry});
+        requirements: st.req, requiredFeatures: st.reqF.filter(f => !st.sims.targetMissing.includes(f)), onlyDryBare: st.dry, hyperArid: st.hyper});
       if (st.sel && !st.res.ranked.some(x => x.id === st.sel)) st.sel = null;
       paintOverlay(); drawRight(); pushMarkers(); drawStatus(); drawCustom(); drawSliders();
     } catch(e){ console.error(e); status.textContent = /positive weight/.test(e.message) ? 'Give at least one available category a weight.' : 'Could not compute scores.'; }
@@ -292,13 +295,18 @@ TT.pages.finder = function(root){
     ys.forEach(y => yearSeg.appendChild(h('button', {type:'button', role:'radio', 'aria-checked': String(y) === String(st.year), onclick: () => { st.year = String(y); drawYears(); rescore(); }}, y === 'now' ? 'Today' : String(y))));
   }
   function drawAI(){ const on = !!(C && C.sample); aiBox.hidden = !on; aiOff.hidden = on; }
-  function drawLeft(){ drawTargets(); drawCustom(); drawPresets(); drawSliders(); drawYears(); drawAI(); }
+  function drawDry(){ // with an aridity index (climate data) the rule is Science's: aridity <= 0.20, plus a hyper-arid option
+    const d = st.m.dry_land || {};
+    dryLabel.textContent = d.has_aridity ? 'Dry land only (aridity ≤ ' + d.max_aridity + ')' : 'Dry, bare land only';
+    hyperRow.hidden = !d.has_aridity;
+  }
+  function drawLeft(){ drawTargets(); drawCustom(); drawPresets(); drawSliders(); drawYears(); drawDry(); drawAI(); }
 
   /* ---------- right panel ---------- */
   function drawStatus(){
     if (st.picking){ status.textContent = 'Click anywhere on Mars to use that ' + PS.cellLabel(st.m, 'mars') + ' as the target.'; return; }
     status.textContent = st.view === 'mars' ? 'Mars target: ' + targetName()
-      : (st.res ? st.res.ranked.length.toLocaleString() + (st.dry ? ' dry, bare' : '') + ' Earth cells ranked against ' + targetName().split(' (')[0] : '');
+      : (st.res ? st.res.ranked.length.toLocaleString() + (st.hyper ? ' hyper-arid' : st.dry ? ((st.m.dry_land || {}).has_aridity ? ' dry' : ' dry, bare') : '') + ' Earth cells ranked against ' + targetName().split(' (')[0] : '');
   }
   function knownName(id){
     const k = st.m.presets.flatMap(p => p.known_analogs).find(a => a.id === id); return k ? k.name : null;
@@ -328,7 +336,7 @@ TT.pages.finder = function(root){
     if (ks.length){
       rBody.appendChild(h('h4', {class:'f-sub'}, own ? 'Known analogs' : 'Known analogs (all missions)'));
       ks.forEach(k => { const x = r.ranked.find(y => y.id === k.id);
-        rBody.appendChild(x ? siteRow(x) : h('div', {class:'f-site off'}, h('span', {class:'f-pos mono'}, '—'), h('span', {class:'f-name'}, k.name, h('span', {class:'tiny muted', style:{display:'block'}}, r.partial.some(y => y.id === k.id) ? 'incomplete data' : r.excluded.some(y => y.id === k.id) ? 'fails a requirement' : 'filtered out (not dry, bare land)')), h('span', null))); });
+        rBody.appendChild(x ? siteRow(x) : h('div', {class:'f-site off'}, h('span', {class:'f-pos mono'}, '—'), h('span', {class:'f-name'}, k.name, h('span', {class:'tiny muted', style:{display:'block'}}, r.partial.some(y => y.id === k.id) ? 'incomplete data' : r.excluded.some(y => y.id === k.id) ? 'fails a requirement' : (st.hyper ? 'filtered out (not hyper-arid)' : (st.m.dry_land || {}).has_aridity ? 'filtered out (not dry land)' : 'filtered out (not dry, bare land)'))), h('span', null))); });
     }
   }
   function drawCard(it, close){

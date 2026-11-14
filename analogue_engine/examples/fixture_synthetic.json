@@ -1,0 +1,353 @@
+{
+  "schema_version": "analogue_engine.bundle.v0",
+  "note": "SYNTHETIC, UNCALIBRATED acceptance fixture (brief section 6). No value here is a measurement of any real place.",
+  "feature_definitions": [
+    {
+      "id": "slope_deg",
+      "dimension": "terrain",
+      "definition": "Local surface slope: angle between the surface normal and the vertical, computed by the data team from a DEM at the stated spatial support (synthetic in this fixture).",
+      "canonical_unit": "deg",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_slope_deg_v0",
+        "description": "FICTITIOUS protocol for the acceptance fixture: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "vrm",
+      "dimension": "terrain",
+      "definition": "Vector Ruggedness Measure (dimensionless, 0 = all unit normals aligned) over the stated window; supplied by the data team (synthetic in this fixture).",
+      "canonical_unit": "1",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_vrm_v0",
+        "description": "FICTITIOUS protocol for the acceptance fixture: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "relief_m",
+      "dimension": "terrain",
+      "definition": "Local relief: elevation range (max - min) within the analysed area at the stated support (synthetic in this fixture).",
+      "canonical_unit": "m",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_relief_m_v0",
+        "description": "FICTITIOUS protocol for the acceptance fixture: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    }
+  ],
+  "sites": [
+    {
+      "id": "synthetic_target",
+      "body": "mars",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_target",
+      "measurements": [
+        {
+          "feature_id": "slope_deg",
+          "value": 10,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.04,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "relief_m",
+          "value": 100,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        }
+      ]
+    },
+    {
+      "id": "synthetic_A",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_A",
+      "measurements": [
+        {
+          "feature_id": "slope_deg",
+          "value": 12,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.05,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "relief_m",
+          "value": 110,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        }
+      ]
+    },
+    {
+      "id": "synthetic_B",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_B",
+      "measurements": [
+        {
+          "feature_id": "slope_deg",
+          "value": 10,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.08,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "relief_m",
+          "value": 150,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        }
+      ]
+    },
+    {
+      "id": "synthetic_C",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_C",
+      "measurements": [
+        {
+          "feature_id": "slope_deg",
+          "value": 10,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "vrm",
+          "value": null,
+          "status": "missing",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "relief_m",
+          "value": null,
+          "status": "missing",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        }
+      ]
+    },
+    {
+      "id": "synthetic_D",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_D",
+      "measurements": [
+        {
+          "feature_id": "slope_deg",
+          "value": 30,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.2,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        },
+        {
+          "feature_id": "relief_m",
+          "value": 300,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "fixture:section6",
+          "uncertainty": null
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "synthetic_slope_priority",
+      "version": "0.1.0",
+      "target_id": "synthetic_target",
+      "calibration_status": "uncalibrated",
+      "description": "Fixture profile 1: slope dominates.",
+      "dimension_weights": {
+        "terrain": 1.0
+      },
+      "features": [
+        {
+          "feature_id": "slope_deg",
+          "weight": 0.8,
+          "tau": 10,
+          "tau_unit": "deg"
+        },
+        {
+          "feature_id": "vrm",
+          "weight": 0.1,
+          "tau": 0.1,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "relief_m",
+          "weight": 0.1,
+          "tau": 100,
+          "tau_unit": "m"
+        }
+      ],
+      "required_features": [],
+      "constraints": []
+    },
+    {
+      "id": "synthetic_texture_priority",
+      "version": "0.1.0",
+      "target_id": "synthetic_target",
+      "calibration_status": "uncalibrated",
+      "description": "Fixture profile 2: VRM and relief dominate.",
+      "dimension_weights": {
+        "terrain": 1.0
+      },
+      "features": [
+        {
+          "feature_id": "slope_deg",
+          "weight": 0.2,
+          "tau": 10,
+          "tau_unit": "deg"
+        },
+        {
+          "feature_id": "vrm",
+          "weight": 0.4,
+          "tau": 0.1,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "relief_m",
+          "weight": 0.4,
+          "tau": 100,
+          "tau_unit": "m"
+        }
+      ],
+      "required_features": [],
+      "constraints": []
+    }
+  ]
+}

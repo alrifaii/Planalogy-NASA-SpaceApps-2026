@@ -1,0 +1,7 @@
+
+location_id,location_name,planetary_body,latitude,longitude,terrain_slope,surface_roughness,temperature,data_source
+E001,Atacama Desert,Earth,-24.5,-69.25,8,0.35,290,SYNTHETIC
+E002,McMurdo Dry Valleys,Earth,-77.5,162.0,12,0.45,253,SYNTHETIC
+E003,Iceland,Earth,64.8,-18.0,15,0.65,278,SYNTHETIC
+L001,Shackleton Crater,Moon,-89.9,0.0,14,0.60,110,SYNTHETIC
+M001,Jezero Crater,Mars,18.38,77.58,10,0.40,210,SYNTHETIC

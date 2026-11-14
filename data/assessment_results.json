@@ -1,0 +1,132 @@
+{
+    "project": "Planeology",
+    "target_location": "Shackleton Crater",
+    "target_body": "Moon",
+    "target_data_source": "SYNTHETIC",
+    "mission_type": "rover_testing",
+    "score_source": "SYNTHETIC",
+    "candidate_count": 3,
+    "assessed_count": 3,
+    "recommendations": [
+        {
+            "location": "Iceland",
+            "mission": "Autonomous Rover Testing",
+            "similarity_score": 92.0,
+            "classification": "High similarity",
+            "potential_application": "Mobility, navigation and obstacle avoidance testing.",
+            "data_coverage": {
+                "available_parameters": [
+                    "terrain_slope",
+                    "surface_roughness"
+                ],
+                "missing_parameters": [
+                    "geology"
+                ],
+                "coverage_percent": 66.67
+            },
+            "data_source": "SYNTHETIC",
+            "status": "Preliminary - requires validation",
+            "location_id": "E003",
+            "latitude": 64.8,
+            "longitude": -18.0
+        },
+        {
+            "location": "Atacama Desert",
+            "mission": "Autonomous Rover Testing",
+            "similarity_score": 85.0,
+            "classification": "High similarity",
+            "potential_application": "Mobility, navigation and obstacle avoidance testing.",
+            "data_coverage": {
+                "available_parameters": [
+                    "terrain_slope",
+                    "surface_roughness"
+                ],
+                "missing_parameters": [
+                    "geology"
+                ],
+                "coverage_percent": 66.67
+            },
+            "data_source": "SYNTHETIC",
+            "status": "Preliminary - requires validation",
+            "location_id": "E001",
+            "latitude": -24.5,
+            "longitude": -69.25
+        },
+        {
+            "location": "McMurdo Dry Valleys",
+            "mission": "Autonomous Rover Testing",
+            "similarity_score": 78.0,
+            "classification": "Moderate similarity",
+            "potential_application": "Mobility, navigation and obstacle avoidance testing.",
+            "data_coverage": {
+                "available_parameters": [
+                    "terrain_slope",
+                    "surface_roughness"
+                ],
+                "missing_parameters": [
+                    "geology"
+                ],
+                "coverage_percent": 66.67
+            },
+            "data_source": "SYNTHETIC",
+            "status": "Preliminary - requires validation",
+            "location_id": "E002",
+            "latitude": -77.5,
+            "longitude": 162.0
+        }
+    ],
+    "map_data": {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        -69.25,
+                        -24.5
+                    ]
+                },
+                "properties": {
+                    "location_id": "E001",
+                    "location_name": "Atacama Desert",
+                    "planetary_body": "Earth",
+                    "data_source": "SYNTHETIC"
+                }
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        162.0,
+                        -77.5
+                    ]
+                },
+                "properties": {
+                    "location_id": "E002",
+                    "location_name": "McMurdo Dry Valleys",
+                    "planetary_body": "Earth",
+                    "data_source": "SYNTHETIC"
+                }
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        -18.0,
+                        64.8
+                    ]
+                },
+                "properties": {
+                    "location_id": "E003",
+                    "location_name": "Iceland",
+                    "planetary_body": "Earth",
+                    "data_source": "SYNTHETIC"
+                }
+            }
+        ]
+    },
+    "validation_status": "Preliminary"
+}

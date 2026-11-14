@@ -1,0 +1,143 @@
+{
+  "note": "Bridge configuration for the backend wide table. Column metadata, tau and weights are PLACEHOLDERS to be replaced by the Data/Science teams.",
+  "feature_definitions": [
+    {
+      "id": "slope_deg",
+      "dimension": "terrain",
+      "definition": "Mean surface slope at the stated DEM support (backend column terrain_slope).",
+      "canonical_unit": "deg",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_slope_deg_v0",
+        "description": "PLACEHOLDER: Data team must state method, version and support.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "roughness_index",
+      "dimension": "terrain",
+      "definition": "Surface roughness index (backend column surface_roughness). DEFINITION PENDING: VRM or another index?",
+      "canonical_unit": "1",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_roughness_index_v0",
+        "description": "PLACEHOLDER: Data team must state method, version and support.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "rock_type",
+      "dimension": "geology",
+      "definition": "Dominant rock type from a shared Earth/Mars vocabulary (backend column geology).",
+      "canonical_unit": "category",
+      "kind": "categorical",
+      "comparator_id": "categorical_match_v1",
+      "categories": [
+        "basaltic_sediment",
+        "evaporite",
+        "volcanic_basalt",
+        "mudstone"
+      ],
+      "comparability_protocol": {
+        "id": "synthetic_protocol_rock_type_v0",
+        "description": "PLACEHOLDER: Data team must state method, version and support.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    }
+  ],
+  "column_specs": {
+    "terrain_slope": {
+      "feature_id": "slope_deg",
+      "unit": "deg",
+      "method_id": "synthetic_method_slope_deg",
+      "method_version": "0",
+      "spatial_support": "synthetic_support_v0",
+      "source_ref": "SYNTHETIC placeholder"
+    },
+    "surface_roughness": {
+      "feature_id": "roughness_index",
+      "unit": "1",
+      "method_id": "synthetic_method_roughness_index",
+      "method_version": "0",
+      "spatial_support": "synthetic_support_v0",
+      "source_ref": "SYNTHETIC placeholder"
+    },
+    "geology": {
+      "feature_id": "rock_type",
+      "unit": "category",
+      "method_id": "synthetic_method_rock_type",
+      "method_version": "0",
+      "spatial_support": "synthetic_support_v0",
+      "source_ref": "SYNTHETIC placeholder"
+    }
+  },
+  "profiles": {
+    "rover_testing": {
+      "id": "rover_testing",
+      "version": "0.1.0",
+      "target_id": "M001",
+      "calibration_status": "uncalibrated",
+      "description": "Engine profile for the backend mission 'rover_testing' (parameters terrain_slope, surface_roughness, geology). Weights and scales are PLACEHOLDERS.",
+      "dimension_weights": {
+        "terrain": 0.7,
+        "geology": 0.3
+      },
+      "features": [
+        {
+          "feature_id": "slope_deg",
+          "weight": 1,
+          "tau": 10,
+          "tau_unit": "deg"
+        },
+        {
+          "feature_id": "roughness_index",
+          "weight": 1,
+          "tau": 0.5,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "rock_type",
+          "weight": 1
+        }
+      ],
+      "required_features": [],
+      "constraints": [],
+      "declared_limitations": [
+        "Gravity: Earth 1 g vs Mars about 0.38 g; rover mobility results do not transfer directly.",
+        "Atmosphere and radiation of Mars are not reproduced on Earth."
+      ]
+    }
+  }
+}

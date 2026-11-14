@@ -1,0 +1,17 @@
+# Python / tooling
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Generated example outputs (re-created by the example scripts)
+examples/output/
+examples/backend_bridge/output_*.json
+
+# Local working notes (kept out of the team repository)
+docs/guia_*
+HANDOFF_CHATGPT.md
+DELIVERY_REPORT.md

@@ -1,0 +1,1346 @@
+{
+  "schema_version": "analogue_engine.bundle.v0",
+  "note": "SYNTHETIC, UNCALIBRATED mixed-kind fixture inspired by the team's P1-P10 list. No value is a measurement of Gale Crater or any real place. P5 (air pressure/temperature, sunlight, UV) is deliberately not scored: see docs.",
+  "feature_definitions": [
+    {
+      "id": "relief_m",
+      "dimension": "terrain",
+      "definition": "P1 local relief: max - min elevation inside the site area (avoids comparing absolute elevations across planetary datums).",
+      "canonical_unit": "m",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_relief_m_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "slope_deg",
+      "dimension": "terrain",
+      "definition": "P1 mean surface slope over the site at the stated DEM support.",
+      "canonical_unit": "deg",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_slope_deg_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "vrm",
+      "dimension": "terrain",
+      "definition": "P1 roughness: Vector Ruggedness Measure over the stated window.",
+      "canonical_unit": "1",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_vrm_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "surface_temp_day_k",
+      "dimension": "thermal",
+      "definition": "P2 mean daytime surface (skin) temperature. Swing omitted on purpose: swing = day - night would double-count.",
+      "canonical_unit": "K",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_surface_temp_day_k_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "surface_temp_night_k",
+      "dimension": "thermal",
+      "definition": "P2 mean night-time surface (skin) temperature.",
+      "canonical_unit": "K",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_surface_temp_night_k_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "thermal_inertia_tiu",
+      "dimension": "thermal",
+      "definition": "P3 thermal inertia (TIU) from a cited retrieval.",
+      "canonical_unit": "J m-2 K-1 s-1/2",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_thermal_inertia_tiu_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "albedo",
+      "dimension": "optical",
+      "definition": "P4 surface brightness as albedo (state which band/definition).",
+      "canonical_unit": "1",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_albedo_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "dust_cover_index",
+      "dimension": "optical",
+      "definition": "P6 surface dust cover index (0 = dust-free).",
+      "canonical_unit": "1",
+      "kind": "scalar",
+      "comparator_id": "clipped_linear_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_dust_cover_index_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "mineral_composition",
+      "dimension": "mineralogy",
+      "definition": "P7 relative abundance of the listed minerals (proportions compared with cosine).",
+      "canonical_unit": "fraction",
+      "kind": "composition",
+      "comparator_id": "cosine_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_mineral_composition_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      },
+      "categories": [
+        "basalt",
+        "clay",
+        "salts",
+        "iron_oxides"
+      ]
+    },
+    {
+      "id": "minerals_present",
+      "dimension": "mineralogy",
+      "definition": "P7 minerals detected above a stated threshold (presence sets compared with Jaccard).",
+      "canonical_unit": "presence",
+      "kind": "set",
+      "comparator_id": "jaccard_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_minerals_present_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      },
+      "categories": [
+        "basalt",
+        "clay",
+        "salts",
+        "iron_oxides"
+      ]
+    },
+    {
+      "id": "rock_type",
+      "dimension": "mineralogy",
+      "definition": "P8 dominant rock type from a shared vocabulary.",
+      "canonical_unit": "category",
+      "kind": "categorical",
+      "comparator_id": "categorical_match_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_rock_type_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      },
+      "categories": [
+        "basaltic_sediment",
+        "evaporite",
+        "volcanic_basalt",
+        "mudstone"
+      ]
+    },
+    {
+      "id": "ground_ice_present",
+      "dimension": "water",
+      "definition": "P10 ground ice detected (true/false). Kept separate from the amount.",
+      "canonical_unit": "boolean",
+      "kind": "boolean",
+      "comparator_id": "boolean_match_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_ground_ice_present_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "hydrogen_wt_pct",
+      "dimension": "water",
+      "definition": "P10 water-equivalent hydrogen, weight percent of dry sample (log comparison).",
+      "canonical_unit": "wt%",
+      "kind": "scalar",
+      "comparator_id": "log_ratio_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_hydrogen_wt_pct_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    },
+    {
+      "id": "crater_density_per_km2",
+      "dimension": "craters",
+      "definition": "P9 impact crater density (spans orders of magnitude -> log comparison).",
+      "canonical_unit": "km-2",
+      "kind": "scalar",
+      "comparator_id": "log_ratio_v1",
+      "comparability_protocol": {
+        "id": "synthetic_protocol_crater_density_per_km2_v0",
+        "description": "FICTITIOUS protocol: same method, version and spatial support required.",
+        "required_metadata": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "must_match": [
+          "method_id",
+          "method_version",
+          "spatial_support"
+        ],
+        "cross_body_comparable": true
+      }
+    }
+  ],
+  "sites": [
+    {
+      "id": "synthetic_mars_reference",
+      "body": "mars",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_mars_reference",
+      "measurements": [
+        {
+          "feature_id": "relief_m",
+          "value": 300,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "slope_deg",
+          "value": 8,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.03,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_day_k",
+          "value": 270,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_day_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_night_k",
+          "value": 190,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_night_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "thermal_inertia_tiu",
+          "value": 300,
+          "status": "valid",
+          "unit": "J m-2 K-1 s-1/2",
+          "method_id": "synthetic_method_thermal_inertia_tiu",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "albedo",
+          "value": 0.22,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_albedo",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "dust_cover_index",
+          "value": 0.4,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_dust_cover_index",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "mineral_composition",
+          "value": {
+            "basalt": 0.5,
+            "clay": 0.2,
+            "salts": 0.05,
+            "iron_oxides": 0.25
+          },
+          "status": "valid",
+          "unit": "fraction",
+          "method_id": "synthetic_method_mineral_composition",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "minerals_present",
+          "value": [
+            "basalt",
+            "clay",
+            "iron_oxides"
+          ],
+          "status": "valid",
+          "unit": "presence",
+          "method_id": "synthetic_method_minerals_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "rock_type",
+          "value": "basaltic_sediment",
+          "status": "valid",
+          "unit": "category",
+          "method_id": "synthetic_method_rock_type",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "ground_ice_present",
+          "value": true,
+          "status": "valid",
+          "unit": "boolean",
+          "method_id": "synthetic_method_ground_ice_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "hydrogen_wt_pct",
+          "value": 2.0,
+          "status": "valid",
+          "unit": "wt%",
+          "method_id": "synthetic_method_hydrogen_wt_pct",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "crater_density_per_km2",
+          "value": 0.02,
+          "status": "valid",
+          "unit": "km-2",
+          "method_id": "synthetic_method_crater_density_per_km2",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        }
+      ]
+    },
+    {
+      "id": "synthetic_earth_E1",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_earth_E1",
+      "measurements": [
+        {
+          "feature_id": "relief_m",
+          "value": 350,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "slope_deg",
+          "value": 10,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.04,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_day_k",
+          "value": 300,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_day_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_night_k",
+          "value": 270,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_night_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "thermal_inertia_tiu",
+          "value": 350,
+          "status": "valid",
+          "unit": "J m-2 K-1 s-1/2",
+          "method_id": "synthetic_method_thermal_inertia_tiu",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "albedo",
+          "value": 0.25,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_albedo",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "dust_cover_index",
+          "value": 0.3,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_dust_cover_index",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "mineral_composition",
+          "value": {
+            "basalt": 0.55,
+            "clay": 0.15,
+            "salts": 0.1,
+            "iron_oxides": 0.2
+          },
+          "status": "valid",
+          "unit": "fraction",
+          "method_id": "synthetic_method_mineral_composition",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "minerals_present",
+          "value": [
+            "basalt",
+            "clay",
+            "iron_oxides",
+            "salts"
+          ],
+          "status": "valid",
+          "unit": "presence",
+          "method_id": "synthetic_method_minerals_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "rock_type",
+          "value": "basaltic_sediment",
+          "status": "valid",
+          "unit": "category",
+          "method_id": "synthetic_method_rock_type",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "ground_ice_present",
+          "value": false,
+          "status": "valid",
+          "unit": "boolean",
+          "method_id": "synthetic_method_ground_ice_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "hydrogen_wt_pct",
+          "value": 0.5,
+          "status": "valid",
+          "unit": "wt%",
+          "method_id": "synthetic_method_hydrogen_wt_pct",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "crater_density_per_km2",
+          "value": 0.002,
+          "status": "valid",
+          "unit": "km-2",
+          "method_id": "synthetic_method_crater_density_per_km2",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        }
+      ]
+    },
+    {
+      "id": "synthetic_earth_E2",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_earth_E2",
+      "measurements": [
+        {
+          "feature_id": "relief_m",
+          "value": 120,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "slope_deg",
+          "value": 3,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.01,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_day_k",
+          "value": 320,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_day_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_night_k",
+          "value": 280,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_night_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "thermal_inertia_tiu",
+          "value": 800,
+          "status": "valid",
+          "unit": "J m-2 K-1 s-1/2",
+          "method_id": "synthetic_method_thermal_inertia_tiu",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "albedo",
+          "value": 0.35,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_albedo",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "dust_cover_index",
+          "value": 0.1,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_dust_cover_index",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "mineral_composition",
+          "value": {
+            "basalt": 0.1,
+            "clay": 0.1,
+            "salts": 0.7,
+            "iron_oxides": 0.1
+          },
+          "status": "valid",
+          "unit": "fraction",
+          "method_id": "synthetic_method_mineral_composition",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "minerals_present",
+          "value": [
+            "salts"
+          ],
+          "status": "valid",
+          "unit": "presence",
+          "method_id": "synthetic_method_minerals_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "rock_type",
+          "value": "evaporite",
+          "status": "valid",
+          "unit": "category",
+          "method_id": "synthetic_method_rock_type",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "ground_ice_present",
+          "value": false,
+          "status": "valid",
+          "unit": "boolean",
+          "method_id": "synthetic_method_ground_ice_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "hydrogen_wt_pct",
+          "value": 0.2,
+          "status": "valid",
+          "unit": "wt%",
+          "method_id": "synthetic_method_hydrogen_wt_pct",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "crater_density_per_km2",
+          "value": 0.0005,
+          "status": "valid",
+          "unit": "km-2",
+          "method_id": "synthetic_method_crater_density_per_km2",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        }
+      ]
+    },
+    {
+      "id": "synthetic_earth_E3",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_earth_E3",
+      "measurements": [
+        {
+          "feature_id": "relief_m",
+          "value": 350,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "slope_deg",
+          "value": 10,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.04,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_day_k",
+          "value": 300,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_day_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_night_k",
+          "value": 270,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_night_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "thermal_inertia_tiu",
+          "value": 350,
+          "status": "valid",
+          "unit": "J m-2 K-1 s-1/2",
+          "method_id": "synthetic_method_thermal_inertia_tiu",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "albedo",
+          "value": 0.25,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_albedo",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "dust_cover_index",
+          "value": 0.3,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_dust_cover_index",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "mineral_composition",
+          "value": null,
+          "status": "missing",
+          "unit": "fraction",
+          "method_id": "synthetic_method_mineral_composition",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "minerals_present",
+          "value": null,
+          "status": "missing",
+          "unit": "presence",
+          "method_id": "synthetic_method_minerals_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "rock_type",
+          "value": "basaltic_sediment",
+          "status": "valid",
+          "unit": "category",
+          "method_id": "synthetic_method_rock_type",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "ground_ice_present",
+          "value": false,
+          "status": "valid",
+          "unit": "boolean",
+          "method_id": "synthetic_method_ground_ice_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "hydrogen_wt_pct",
+          "value": 0.5,
+          "status": "valid",
+          "unit": "wt%",
+          "method_id": "synthetic_method_hydrogen_wt_pct",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "crater_density_per_km2",
+          "value": 0.002,
+          "status": "valid",
+          "unit": "km-2",
+          "method_id": "synthetic_method_crater_density_per_km2",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        }
+      ]
+    },
+    {
+      "id": "synthetic_earth_E4",
+      "body": "earth",
+      "data_mode": "synthetic",
+      "name": null,
+      "area_ref": "synthetic_area:synthetic_earth_E4",
+      "measurements": [
+        {
+          "feature_id": "relief_m",
+          "value": 350,
+          "status": "valid",
+          "unit": "m",
+          "method_id": "synthetic_method_relief_m",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "slope_deg",
+          "value": 10,
+          "status": "valid",
+          "unit": "deg",
+          "method_id": "synthetic_method_slope_deg",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "vrm",
+          "value": 0.04,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_vrm",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_day_k",
+          "value": 300,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_day_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "surface_temp_night_k",
+          "value": 270,
+          "status": "valid",
+          "unit": "K",
+          "method_id": "synthetic_method_surface_temp_night_k",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "thermal_inertia_tiu",
+          "value": 350,
+          "status": "valid",
+          "unit": "J m-2 K-1 s-1/2",
+          "method_id": "synthetic_method_thermal_inertia_tiu",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "albedo",
+          "value": 0.25,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_albedo",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "dust_cover_index",
+          "value": 0.3,
+          "status": "valid",
+          "unit": "1",
+          "method_id": "synthetic_method_dust_cover_index",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "mineral_composition",
+          "value": {
+            "basalt": 0.55,
+            "clay": 0.15,
+            "salts": 0.1,
+            "iron_oxides": 0.2
+          },
+          "status": "valid",
+          "unit": "fraction",
+          "method_id": "synthetic_method_mineral_composition",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "minerals_present",
+          "value": [
+            "basalt",
+            "clay",
+            "iron_oxides",
+            "salts"
+          ],
+          "status": "valid",
+          "unit": "presence",
+          "method_id": "synthetic_method_minerals_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "rock_type",
+          "value": "volcanic_basalt",
+          "status": "valid",
+          "unit": "category",
+          "method_id": "synthetic_method_rock_type",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "ground_ice_present",
+          "value": true,
+          "status": "valid",
+          "unit": "boolean",
+          "method_id": "synthetic_method_ground_ice_present",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "hydrogen_wt_pct",
+          "value": 4.0,
+          "status": "valid",
+          "unit": "wt%",
+          "method_id": "synthetic_method_hydrogen_wt_pct",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        },
+        {
+          "feature_id": "crater_density_per_km2",
+          "value": 0.002,
+          "status": "valid",
+          "unit": "km-2",
+          "method_id": "synthetic_method_crater_density_per_km2",
+          "method_version": "0",
+          "spatial_support": "synthetic_support_v0",
+          "source_ref": "SYNTHETIC: invented for engine tests, not a measurement"
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "synthetic_mixed_rover",
+      "version": "0.2.0",
+      "target_id": "synthetic_mars_reference",
+      "calibration_status": "uncalibrated",
+      "description": "SYNTHETIC mixed-kind profile exercising all comparators (P1-P10 inspired). Weights and scales are placeholders.",
+      "dimension_weights": {
+        "terrain": 0.35,
+        "thermal": 0.2,
+        "optical": 0.1,
+        "mineralogy": 0.25,
+        "water": 0.05,
+        "craters": 0.05
+      },
+      "features": [
+        {
+          "feature_id": "relief_m",
+          "weight": 1,
+          "range": {
+            "min": 0,
+            "max": 1000
+          },
+          "tau_unit": "m"
+        },
+        {
+          "feature_id": "slope_deg",
+          "weight": 1,
+          "tau": 10,
+          "tau_unit": "deg"
+        },
+        {
+          "feature_id": "vrm",
+          "weight": 1,
+          "tau": 0.1,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "surface_temp_day_k",
+          "weight": 1,
+          "tau": 50,
+          "tau_unit": "K"
+        },
+        {
+          "feature_id": "surface_temp_night_k",
+          "weight": 1,
+          "tau": 50,
+          "tau_unit": "K"
+        },
+        {
+          "feature_id": "thermal_inertia_tiu",
+          "weight": 2,
+          "tau": 300,
+          "tau_unit": "J m-2 K-1 s-1/2"
+        },
+        {
+          "feature_id": "albedo",
+          "weight": 1,
+          "tau": 0.15,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "dust_cover_index",
+          "weight": 1,
+          "tau": 0.5,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "mineral_composition",
+          "weight": 2
+        },
+        {
+          "feature_id": "minerals_present",
+          "weight": 1
+        },
+        {
+          "feature_id": "rock_type",
+          "weight": 1
+        },
+        {
+          "feature_id": "ground_ice_present",
+          "weight": 1
+        },
+        {
+          "feature_id": "hydrogen_wt_pct",
+          "weight": 1,
+          "tau": 2,
+          "tau_unit": "decade"
+        },
+        {
+          "feature_id": "crater_density_per_km2",
+          "weight": 1,
+          "tau": 3,
+          "tau_unit": "decade"
+        }
+      ],
+      "required_features": [],
+      "constraints": [],
+      "declared_limitations": [
+        "Gravity: Earth 1 g vs Mars about 0.38 g; not reproducible on Earth.",
+        "Atmosphere: Mars surface pressure is under 1% of Earth's; P5 is reported, not scored.",
+        "Radiation: the Martian surface radiation environment is not reproduced on Earth."
+      ]
+    },
+    {
+      "id": "synthetic_mixed_ice_required",
+      "version": "0.2.0",
+      "target_id": "synthetic_mars_reference",
+      "calibration_status": "uncalibrated",
+      "description": "Same as synthetic_mixed_rover plus a hard requirement: ground ice must be present.",
+      "dimension_weights": {
+        "terrain": 0.35,
+        "thermal": 0.2,
+        "optical": 0.1,
+        "mineralogy": 0.25,
+        "water": 0.05,
+        "craters": 0.05
+      },
+      "features": [
+        {
+          "feature_id": "relief_m",
+          "weight": 1,
+          "range": {
+            "min": 0,
+            "max": 1000
+          },
+          "tau_unit": "m"
+        },
+        {
+          "feature_id": "slope_deg",
+          "weight": 1,
+          "tau": 10,
+          "tau_unit": "deg"
+        },
+        {
+          "feature_id": "vrm",
+          "weight": 1,
+          "tau": 0.1,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "surface_temp_day_k",
+          "weight": 1,
+          "tau": 50,
+          "tau_unit": "K"
+        },
+        {
+          "feature_id": "surface_temp_night_k",
+          "weight": 1,
+          "tau": 50,
+          "tau_unit": "K"
+        },
+        {
+          "feature_id": "thermal_inertia_tiu",
+          "weight": 2,
+          "tau": 300,
+          "tau_unit": "J m-2 K-1 s-1/2"
+        },
+        {
+          "feature_id": "albedo",
+          "weight": 1,
+          "tau": 0.15,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "dust_cover_index",
+          "weight": 1,
+          "tau": 0.5,
+          "tau_unit": "1"
+        },
+        {
+          "feature_id": "mineral_composition",
+          "weight": 2
+        },
+        {
+          "feature_id": "minerals_present",
+          "weight": 1
+        },
+        {
+          "feature_id": "rock_type",
+          "weight": 1
+        },
+        {
+          "feature_id": "ground_ice_present",
+          "weight": 1
+        },
+        {
+          "feature_id": "hydrogen_wt_pct",
+          "weight": 1,
+          "tau": 2,
+          "tau_unit": "decade"
+        },
+        {
+          "feature_id": "crater_density_per_km2",
+          "weight": 1,
+          "tau": 3,
+          "tau_unit": "decade"
+        }
+      ],
+      "required_features": [
+        "ground_ice_present"
+      ],
+      "constraints": [
+        {
+          "id": "ice_must_be_present",
+          "feature_id": "ground_ice_present",
+          "type": "equals",
+          "value": true
+        }
+      ],
+      "declared_limitations": [
+        "Gravity: Earth 1 g vs Mars about 0.38 g; not reproducible on Earth.",
+        "Atmosphere: Mars surface pressure is under 1% of Earth's; P5 is reported, not scored.",
+        "Radiation: the Martian surface radiation environment is not reproduced on Earth."
+      ]
+    }
+  ]
+}

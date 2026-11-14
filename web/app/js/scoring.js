@@ -87,14 +87,14 @@
 
   /** Earth table for a year between two projected years (t = 0 at the first, 1 at the second).
    *  Climate columns (manifest.year_columns, aridity) are interpolated linearly; flags switch at the midpoint,
-   *  except dry land, which follows the interpolated aridity index when there is one. Both tables are full
+   *  except dry land, which follows the interpolated aridity index (or the cold-desert flag) when there is one. Both tables are full
    *  tables (earthForYear). This is a display aid between projections: the engine itself scores only the
    *  projected years. */
   function blendEarth(manifest, a, b, t) {
     if (t <= 0) return a;
     if (t >= 1) return b;
     const ix = colIndex(a);
-    const cols = (manifest.year_columns || []).concat(['aridity_index'])
+    const cols = (manifest.year_columns || []).concat(['aridity_index', 'cold_desert'])
       .filter((c, i, arr) => arr.indexOf(c) === i && ix[c] !== undefined && c !== 'dry_bare');
     const dl = manifest.dry_land || {}, maxA = dl.max_aridity != null ? dl.max_aridity : 0.2;
     const byId = new Map(b.rows.map(r => [r[ix.id], r]));
@@ -109,8 +109,10 @@
         out[i] = typeof x === 'number' && typeof y === 'number' ? x + (y - x) * t : (t < 0.5 ? x : y);
       }
       if (ix.dry_bare !== undefined) {
+        // a change between years can only come from the climate (NDVI, ice and water stay as today)
         const x = ra[ix.dry_bare], y = rb[ix.dry_bare], ai = ix.aridity_index !== undefined ? out[ix.aridity_index] : null;
-        out[ix.dry_bare] = x === y ? x : (typeof ai === 'number' ? ai <= maxA : (t < 0.5 ? x : y));
+        const cold = ix.cold_desert !== undefined ? !!out[ix.cold_desert] : false;
+        out[ix.dry_bare] = x === y ? x : (typeof ai === 'number' ? ai <= maxA || cold : (t < 0.5 ? x : y));
       }
       rows.push(out);
     }

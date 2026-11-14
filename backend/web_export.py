@@ -113,7 +113,7 @@ def _earth_rows(data: dict, with_aridity: bool = False) -> list[list]:
             continue
         site = _site("earth", data, key)
         row = [site["id"], key[0], key[1]] + _values(site) + [g.passes_earth_filter(r)]
-        rows.append(row + [g._num(r, "aridity_index")] if with_aridity else row)
+        rows.append(row + [g._num(r, "aridity_index"), g.is_cold_desert(r)] if with_aridity else row)
     return rows
 
 
@@ -153,7 +153,7 @@ def _preset_entry(preset: dict, data_dir: Path, calibrate: bool, data: dict) -> 
 SCENARIO_LABELS = {"ssp245": "SSP2-4.5 · middle of the road", "ssp585": "SSP5-8.5 · high emissions"}
 SCENARIO_SHORT = {"ssp245": ("Moderate", "SSP2-4.5"), "ssp585": ("High emissions", "SSP5-8.5")}
 FUTURE_NOTE = ("Future years: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. the day-night "
-               "air swing, precipitation and aridity (dry-land filter). NDVI, ground temperature, terrain, rock type, "
+               "air swing, precipitation and aridity (dry-land filter). NDVI (vegetation: no global projection exists), ground temperature, terrain, rock type, "
                "craters and albedo stay as today (no projection). The app interpolates linearly between the "
                "projected years.")
 
@@ -179,7 +179,7 @@ def export(
 
     payloads: dict[str, dict] = {"mars": {"columns": ["lat", "lon"] + FEATURES, "rows": _mars_rows(base)}}
     aridity = base["has_aridity"]
-    extra = ["aridity_index"] if aridity else []
+    extra = ["aridity_index", "cold_desert"] if aridity else []
     full_cols = ["id", "lat", "lon"] + FEATURES + ["dry_bare"] + extra
     year_cols = ["id"] + YEAR_COLUMNS + extra
     keep = [full_cols.index(c) for c in year_cols]
@@ -245,10 +245,16 @@ def export(
         "year_columns": YEAR_COLUMNS,
         "files": files,
         "compression": "gzip" if use_gzip else "none",
-        "dry_bare_rule": (f"aridity index <= {g.DRY_MAX_ARIDITY} (arid + hyper-arid, Science), not ice or water"
+        "dry_bare_rule": (f"NDVI < {g.MAX_NDVI} (bare ground), not ice or water, and aridity index <= {g.DRY_MAX_ARIDITY} "
+                          f"(arid + hyper-arid) or a cold desert (mean air temperature < 0 degC, precipitation < "
+                          f"{g.COLD_DESERT_MAX_PRECIP:g} mm/yr, albedo < {g.COLD_DESERT_MAX_ALBEDO}) (Science)"
                           if aridity else
                           "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)"),
-        "dry_land": {"has_aridity": aridity, "max_aridity": g.DRY_MAX_ARIDITY, "hyper_arid_below": g.HYPER_ARID_BELOW},
+        "dry_land": {"has_aridity": aridity, "max_aridity": g.DRY_MAX_ARIDITY, "hyper_arid_below": g.HYPER_ARID_BELOW,
+                     "max_ndvi": g.MAX_NDVI,
+                     "cold_desert": {"max_air_temp_C": round(g.COLD_DESERT_MAX_TEMP_K - 273.15, 2),
+                                     "max_precip_mm_yr": g.COLD_DESERT_MAX_PRECIP,
+                                     "max_albedo": g.COLD_DESERT_MAX_ALBEDO}},
         "thresholds": {"strong_at_least": 75, "weak_at_most": 40},
         "common_limitations": base["limitations"],
     }

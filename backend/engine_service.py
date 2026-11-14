@@ -185,7 +185,8 @@ def preset_profile(
         hit = cache.get(preset_id)
         # entries written before the grid was recorded come from the 1-degree grid
         if (hit and hit.get("start_version") == start["version"]
-                and hit.get("grid", g.SUPPORT) == data["support"]):
+                and hit.get("grid", g.SUPPORT) == data["support"]
+                and hit.get("dry_rule") == g.DRY_LAND_RULE):
             return hit["profile"], hit["info"]
 
     target = _target(preset, data)
@@ -211,7 +212,8 @@ def preset_profile(
     }
     profile = cal.recommended_profile
     if cache_file is not None:
-        cache[preset_id] = {"start_version": start["version"], "grid": data["support"], "profile": profile, "info": info}
+        cache[preset_id] = {"start_version": start["version"], "grid": data["support"], "dry_rule": g.DRY_LAND_RULE,
+                            "profile": profile, "info": info}
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         cache_file.write_text(to_json(cache) + "\n", encoding="utf-8")
     return profile, info

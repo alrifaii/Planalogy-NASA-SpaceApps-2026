@@ -402,16 +402,39 @@ DRY_MAX_ARIDITY = 0.20  # Science: arid + hyper-arid (UNEP/IPCC classes)
 HYPER_ARID_BELOW = 0.05  # Science: the most Mars-like land (e.g. Atacama)
 
 
-def passes_earth_filter(r: dict, max_precip: float = 500.0, max_ndvi: float = 0.2,
+DRY_LAND_RULE = "dry_v2"  # aridity or cold desert, NDVI < 0.2; bump when the rule changes (cache key)
+MAX_NDVI = 0.2  # Science: below 0.2 is bare ground; removes irrigated valleys (NDVI is today's, not projected)
+# Science (polar-desert definition): cold places barely evaporate, so the aridity index calls them wet
+COLD_DESERT_MAX_TEMP_K = 273.15  # mean annual air temperature below 0 degC ...
+COLD_DESERT_MAX_PRECIP = 250.0  # ... and precipitation below 250 mm/yr
+# Provisional (ours, to confirm with Science): ice sheets that the geology map gives a rock type would
+# pass the cold rule, so a cold cell must also be darker than snow/ice. Dry Valleys 0.51, Devon 0.42,
+# ice sheet 0.7-0.8.
+COLD_DESERT_MAX_ALBEDO = 0.6
+
+
+def is_cold_desert(r: dict) -> bool:
+    """Polar/cold desert climate on ice-free ground (the dry-land rule's second branch)."""
+    temp, precip, albedo = _num(r, "air_temp_mean_K"), _num(r, "precipitation_mm_yr"), _num(r, "albedo")
+    return (temp is not None and precip is not None and temp < COLD_DESERT_MAX_TEMP_K
+            and precip < COLD_DESERT_MAX_PRECIP and (albedo is None or albedo < COLD_DESERT_MAX_ALBEDO))
+
+
+def passes_earth_filter(r: dict, max_precip: float = 500.0, max_ndvi: float = MAX_NDVI,
                         max_aridity: float = DRY_MAX_ARIDITY) -> bool:
-    """Dry land: aridity index <= max_aridity when known, else the provisional precipitation/NDVI rule."""
+    """Dry land (Science): bare ground (NDVI < max_ndvi, or unknown), not ice or water, and either
+    aridity index <= max_aridity or a cold desert (is_cold_desert). Without aridity index and air
+    temperature, the provisional precipitation rule (< max_precip) applies."""
     if r.get("is_land") != "1.0" or r.get("rock_group") in ("ice", "water", ""):
         return False
+    ndvi = _num(r, "ndvi")
+    if ndvi is not None and ndvi >= max_ndvi:
+        return False
     aridity = _num(r, "aridity_index")
-    if aridity is not None:
-        return aridity <= max_aridity
-    precip, ndvi = _num(r, "precipitation_mm_yr"), _num(r, "ndvi")
-    return precip is not None and precip < max_precip and (ndvi is None or ndvi < max_ndvi)
+    if aridity is None and _num(r, "air_temp_mean_K") is None:
+        precip = _num(r, "precipitation_mm_yr")
+        return precip is not None and precip < max_precip
+    return (aridity is not None and aridity <= max_aridity) or is_cold_desert(r)
 
 
 def is_hyper_arid(r: dict) -> bool:

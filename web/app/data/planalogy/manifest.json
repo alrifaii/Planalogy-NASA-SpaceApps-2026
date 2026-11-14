@@ -273,34 +273,34 @@
       "why": "Terrain decides mobility; surface material (thermal inertia, albedo) separates dunes, gravel and bedrock.",
       "target": "gale",
       "category_weights": {
-        "terrain": 0.39806135444181295,
-        "thermal": 0.09841079927947585,
-        "thermophysical": 0.09969961335506432,
-        "optical": 0.20323319370127943,
-        "mineralogy": 0.02411345382202394,
-        "geology": 0.014757150958241538,
-        "craters": 0.07702005964172845,
-        "water": 0.08470437480037361
+        "terrain": 0.3754117739001206,
+        "thermal": 0.09657933254730926,
+        "thermophysical": 0.11060657473088502,
+        "optical": 0.20372632160094925,
+        "mineralogy": 0.02613060923907829,
+        "geology": 0.017658755030396794,
+        "craters": 0.07980685547477347,
+        "water": 0.09007977747648725
       },
       "feature_weights": {
-        "slope_deg": 0.14344639788277846,
-        "roughness_m": 0.12769712979552406,
-        "relief_m": 0.12691782676351043,
-        "surface_temp_swing_K": 0.05223956419349221,
-        "surface_temp_min_K": 0.02357639474670992,
-        "air_temp_swing_K": 0.02259484033927372,
-        "ati_percentile": 0.09969961335506432,
-        "albedo": 0.20323319370127943,
-        "mineral_groups": 0.02411345382202394,
-        "rock_group": 0.014757150958241538,
-        "inside_impact_structure": 0.07702005964172845,
-        "ground_ice_flag": 0.08470437480037361
+        "slope_deg": 0.13419841427118653,
+        "roughness_m": 0.12242510139116804,
+        "relief_m": 0.11878825823776604,
+        "surface_temp_swing_K": 0.05148982437132437,
+        "surface_temp_min_K": 0.022151651966203386,
+        "air_temp_swing_K": 0.0229378562097815,
+        "ati_percentile": 0.11060657473088502,
+        "albedo": 0.20372632160094925,
+        "mineral_groups": 0.02613060923907829,
+        "rock_group": 0.017658755030396794,
+        "inside_impact_structure": 0.07980685547477347,
+        "ground_ice_flag": 0.09007977747648725
       },
       "requirements": [],
       "required_features": [],
       "weights_used": "calibrated",
       "verdict": "accepted",
-      "verdict_reason": "hidden analogs: mean rank 772 -> 634 (+17.9%), 2/2 improved; threshold 5% and half improved",
+      "verdict_reason": "hidden analogs: mean rank 504 -> 446 (+11.6%), 2/2 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -357,7 +357,7 @@
       "required_features": [],
       "weights_used": "science (start)",
       "verdict": "rejected",
-      "verdict_reason": "hidden analogs: mean rank 1988 -> 1939 (+2.5%), 2/2 improved; threshold 5% and half improved",
+      "verdict_reason": "hidden analogs: mean rank 1563 -> 1527 (+2.3%), 2/2 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -383,34 +383,34 @@
       "why": "The day-night swing is the clearest Mars-like signal (Science P2); cold minima matter for survival heating.",
       "target": "gale",
       "category_weights": {
-        "terrain": 0.06765594284119299,
-        "thermal": 0.5582265946456595,
-        "thermophysical": 0.09005589238853672,
-        "optical": 0.20523879949569054,
-        "mineralogy": 0.0,
-        "geology": 0.0,
         "craters": 0.0,
-        "water": 0.07882277062892024
+        "geology": 0.0,
+        "mineralogy": 0.0,
+        "optical": 1.0,
+        "terrain": 0.25,
+        "thermal": 3.0,
+        "thermophysical": 1.0,
+        "water": 0.5
       },
       "feature_weights": {
-        "slope_deg": 0.020765743142899726,
-        "roughness_m": 0.021197545149602648,
-        "relief_m": 0.025692654548690613,
-        "surface_temp_swing_K": 0.3076911326707499,
-        "surface_temp_min_K": 0.1261578629863216,
-        "air_temp_swing_K": 0.12437759898858808,
-        "ati_percentile": 0.09005589238853672,
-        "albedo": 0.20523879949569054,
-        "mineral_groups": 0.0,
-        "rock_group": 0.0,
-        "inside_impact_structure": 0.0,
-        "ground_ice_flag": 0.07882277062892024
+        "slope_deg": 1.0,
+        "roughness_m": 1.0,
+        "relief_m": 1.0,
+        "surface_temp_swing_K": 2.0,
+        "surface_temp_min_K": 1.0,
+        "air_temp_swing_K": 1.0,
+        "ati_percentile": 1.0,
+        "albedo": 1.0,
+        "mineral_groups": 1.0,
+        "rock_group": 1.0,
+        "inside_impact_structure": 1.0,
+        "ground_ice_flag": 1.0
       },
       "requirements": [],
       "required_features": [],
-      "weights_used": "calibrated",
-      "verdict": "accepted",
-      "verdict_reason": "hidden analogs: mean rank 148 -> 56 (+62.4%), 2/2 improved; threshold 5% and half improved",
+      "weights_used": "science (start)",
+      "verdict": "rejected",
+      "verdict_reason": "hidden analogs: mean rank 813 -> 844 (-3.8%), 1/3 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -440,28 +440,28 @@
       "why": "Ice is a hard requirement for the Earth site. Similarity then favours cold, flat plains.",
       "target": "arcadia",
       "category_weights": {
-        "craters": 0,
+        "craters": 0.0,
         "geology": 0.5,
-        "mineralogy": 0,
+        "mineralogy": 0.0,
         "optical": 0.5,
-        "terrain": 1,
-        "thermal": 2,
+        "terrain": 1.0,
+        "thermal": 2.0,
         "thermophysical": 0.5,
-        "water": 0
+        "water": 0.0
       },
       "feature_weights": {
-        "slope_deg": 1,
-        "roughness_m": 1,
-        "relief_m": 1,
-        "surface_temp_swing_K": 2,
-        "surface_temp_min_K": 1,
-        "air_temp_swing_K": 1,
-        "ati_percentile": 1,
-        "albedo": 1,
-        "mineral_groups": 1,
-        "rock_group": 1,
-        "inside_impact_structure": 1,
-        "ground_ice_flag": 0
+        "slope_deg": 1.0,
+        "roughness_m": 1.0,
+        "relief_m": 1.0,
+        "surface_temp_swing_K": 2.0,
+        "surface_temp_min_K": 1.0,
+        "air_temp_swing_K": 1.0,
+        "ati_percentile": 1.0,
+        "albedo": 1.0,
+        "mineral_groups": 1.0,
+        "rock_group": 1.0,
+        "inside_impact_structure": 1.0,
+        "ground_ice_flag": 0.0
       },
       "requirements": [
         {
@@ -475,7 +475,7 @@
       ],
       "weights_used": "science (start)",
       "verdict": "not_validated",
-      "verdict_reason": "none of the known analogs are among the candidate cells",
+      "verdict_reason": "leave-one-out was not run (it needs at least 2 usable known analogs); keep the starting weights",
       "known_analogs": [
         {
           "name": "Devon Island (Haughton)",
@@ -548,7 +548,7 @@
     "ssp245",
     "ssp585"
   ],
-  "future_note": "Future years: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. the day-night air swing, precipitation and aridity (dry-land filter). NDVI, ground temperature, terrain, rock type, craters and albedo stay as today (no projection). The app interpolates linearly between the projected years.",
+  "future_note": "Future years: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. the day-night air swing, precipitation and aridity (dry-land filter). NDVI (vegetation: no global projection exists), ground temperature, terrain, rock type, craters and albedo stay as today (no projection). The app interpolates linearly between the projected years.",
   "year_columns": [
     "surface_temp_swing_K",
     "surface_temp_min_K",
@@ -568,11 +568,17 @@
     "mars": "mars.json"
   },
   "compression": "none",
-  "dry_bare_rule": "aridity index <= 0.2 (arid + hyper-arid, Science), not ice or water",
+  "dry_bare_rule": "NDVI < 0.2 (bare ground), not ice or water, and aridity index <= 0.2 (arid + hyper-arid) or a cold desert (mean air temperature < 0 degC, precipitation < 250 mm/yr, albedo < 0.6) (Science)",
   "dry_land": {
     "has_aridity": true,
     "max_aridity": 0.2,
-    "hyper_arid_below": 0.05
+    "hyper_arid_below": 0.05,
+    "max_ndvi": 0.2,
+    "cold_desert": {
+      "max_air_temp_C": 0.0,
+      "max_precip_mm_yr": 250.0,
+      "max_albedo": 0.6
+    }
   },
   "thresholds": {
     "strong_at_least": 75,

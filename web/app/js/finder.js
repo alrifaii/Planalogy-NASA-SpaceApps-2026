@@ -395,7 +395,7 @@ TT.pages.finder = function(root){
   function drawAI(){ const on = !!(C && C.sample); aiBox.hidden = !on; aiOff.hidden = on; }
   function drawDry(){ // with an aridity index (climate data) the rule is Science's: aridity <= 0.20, plus a hyper-arid option
     const d = st.m.dry_land || {};
-    dryLabel.textContent = d.has_aridity ? 'Dry land only (aridity ≤ ' + d.max_aridity + ')' : 'Dry, bare land only';
+    dryLabel.textContent = d.has_aridity ? 'Dry land only (aridity ≤ ' + d.max_aridity + (d.cold_desert ? ', or polar desert' : '') + ')' : 'Dry, bare land only';
     hyperRow.hidden = !d.has_aridity;
   }
   function drawLeft(){ drawMode(); drawTargets(); drawCustom(); drawPresets(); drawSliders(); drawYears(); drawDry(); drawAI(); }

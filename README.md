@@ -62,11 +62,17 @@ present grid as follows:
 - **Ground temperatures (delta method):** today's ground temperature plus the
   projected change in air temperature since the earliest yearly file, which
   acts as the model's present.
-- **Dry land:** follows Science's aridity rule. It counts as dry when
-  `aridity_index` ≤ 0.20, and the app adds a "hyper-arid only" option
-  (< 0.05).
-- **Not projected:** terrain, rock, craters, albedo, thermal inertia and
-  ground ice keep their present values.
+- **Dry land:** follows Science's rule. A land cell that is not ice or water
+  counts as dry when it is bare ground (NDVI < 0.2) and either
+  `aridity_index` ≤ 0.20 or a cold desert: mean annual air temperature
+  below 0 °C and precipitation below 250 mm/yr. Cold deserts barely
+  evaporate, so the aridity index alone calls them wet (Devon Island, Dry
+  Valleys). A cold cell must also have albedo < 0.6, so ice sheets that the
+  geology map gives a rock type stay out (provisional, to confirm with
+  Science). The app adds a "hyper-arid only" option (aridity < 0.05).
+- **Not projected:** terrain, rock, craters, albedo, thermal inertia,
+  ground ice and NDVI (vegetation) keep their present values. No global
+  NDVI projection exists, so on the future maps plants stay as today.
 
 **Other resolutions (e.g. 50 km cells):** nothing assumes 1° cells. Put one
 `earth_<name>.csv` and one `mars_<name>.csv` (same columns) in a folder, for

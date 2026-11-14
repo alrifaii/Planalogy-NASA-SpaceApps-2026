@@ -104,6 +104,23 @@ def test_threshold_edges():
     assert g.passes_earth_filter(old) and not g.is_hyper_arid(old)  # no index: provisional rule, never hyper-arid
 
 
+def test_cold_desert_and_bare_ground_rules():
+    # Science: polar deserts count (mean air temperature < 0 degC, precipitation < 250 mm), NDVI must be < 0.2
+    devon = {"is_land": "1.0", "rock_group": "sedimentary", "aridity_index": "1.13", "air_temp_mean_K": "255.6",
+             "precipitation_mm_yr": "183.5", "ndvi": "0.155", "albedo": "0.42"}
+    assert g.passes_earth_filter(devon) and g.is_cold_desert(devon) and not g.is_hyper_arid(devon)
+    assert not g.passes_earth_filter({**devon, "precipitation_mm_yr": "250"})
+    assert not g.passes_earth_filter({**devon, "air_temp_mean_K": "273.15"})
+    assert not g.passes_earth_filter({**devon, "albedo": "0.78"})  # ice sheet with a rock type underneath
+    assert not g.passes_earth_filter({**devon, "rock_group": "ice"})
+    irrigated = {"is_land": "1.0", "rock_group": "sedimentary", "aridity_index": "0.18", "ndvi": "0.37",
+                 "air_temp_mean_K": "284.2", "precipitation_mm_yr": "200"}
+    assert not g.passes_earth_filter(irrigated)  # desert climate on paper, green crops
+    assert g.passes_earth_filter({**irrigated, "ndvi": "0.199"}) and g.passes_earth_filter({**irrigated, "ndvi": ""})
+    # aridity unknown but temperature known: only the cold branch can make it dry
+    assert not g.passes_earth_filter({**irrigated, "aridity_index": "", "ndvi": "0.1"})
+
+
 def test_cells_missing_from_a_projection_lose_only_climate_values():
     base = {(1.5, 1.5): {"elevation_m": "10", "surface_temp_swing_K": "20", "surface_temp_min_K": "250",
                          "precipitation_mm_yr": "90"}}
@@ -136,7 +153,9 @@ def test_export_carries_aridity_only_when_present(grid, tmp_path):
     assert m["dry_land"]["max_aridity"] == 0.2 and m["dry_land"]["hyper_arid_below"] == 0.05
     earth = json.loads((tmp_path / "web" / "earth.json").read_text(encoding="utf-8"))
     year = json.loads((tmp_path / "web" / "earth_2050.json").read_text(encoding="utf-8"))
-    assert earth["columns"][-1] == "aridity_index" and year["columns"] == ["id"] + we.YEAR_COLUMNS + ["aridity_index"]
+    extra = ["aridity_index", "cold_desert"]
+    assert earth["columns"][-2:] == extra and year["columns"] == ["id"] + we.YEAR_COLUMNS + extra
+    assert m["dry_land"]["max_ndvi"] == 0.2 and m["dry_land"]["cold_desert"]["max_precip_mm_yr"] == 250
 
 
 RUNNER = r"""

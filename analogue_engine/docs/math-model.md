@@ -112,6 +112,37 @@ challenge's "excellent geological analog but a poor temperature analog".
 Profiles may carry `declared_limitations` (gravity, vacuum, thin atmosphere,
 radiation…): copied to every result, never scored.
 
+## 4c. Weight calibration against known analogs (`calibration.py`)
+
+For complete candidates S_i(w) = Σ_j w_j s_ij is linear in the effective
+weights. Given known analogs P (accepted by experts) and the other,
+unlabelled candidates N, `calibrate_weights` minimises over the simplex:
+
+    L(w) = mean_{p∈P, n∈N} softplus(−(S_p − S_n)/T) + λ · KL(w ‖ w0)
+
+* The pairwise logistic ranking loss pushes known analogs above other
+  candidates. T = 0.05 is in score units.
+* The KL anchor keeps w near the starting weights w0 (from Science or an
+  AI-written profile). With few labels this is what prevents memorisation.
+* The optimiser is exponentiated gradient (mirror descent). Each step solves
+  the KL term exactly: log w ∝ (log w_t − η g + ηλ log w0)/(1 + ηλ), which is
+  stable for any λ. It is deterministic and keeps w > 0 with Σ w = 1.
+* Only features that start with a positive weight are tuned. τ, comparators,
+  requirements and data are unchanged. The output profile is `<version>-cal`
+  with `calibration_status: provisional`.
+* Leave-one-out validation: each known analog is hidden, the weights are
+  re-tuned on the rest, and the hidden one's rank is recorded. All reported
+  ranks come from re-running the engine with the calibrated profile.
+* Unlabelled candidates are not assumed to be bad; the best-ranked ones are
+  the new-analog suggestions.
+
+Synthetic check (`examples/calibration/`): there are 126 candidates and 6
+invented analogs that resemble the reference only in terrain and mineralogy.
+Those two categories go from 0.167 to 0.242 and 0.230. The analogs' mean
+rank goes from the top 14.9 % to the top 4.1 %. Leave-one-out improves the
+hidden ones that started far down (#54→#28, #33→#14, #20→#4); those already
+at the top stay or drop one place.
+
 ## 5. Comparability, missing data and coverage
 
 Each pair of measurements passes a per-feature protocol check:

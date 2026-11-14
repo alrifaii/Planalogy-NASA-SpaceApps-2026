@@ -14,6 +14,46 @@ from .errors import ProfileError
 from .models import Profile, feature_definitions_by_id
 
 
+def profile_to_dict(profile: Profile) -> dict[str, Any]:
+    """Serialise a Profile back to the JSON contract (inverse of Profile.from_dict)."""
+    features = []
+    for f in profile.features:
+        item: dict[str, Any] = {"feature_id": f.feature_id, "weight": f.weight}
+        if f.range_min is not None:
+            item["range"] = {"min": f.range_min, "max": f.range_max}
+        elif f.tau is not None:
+            item["tau"] = f.tau
+        if f.tau_unit is not None:
+            item["tau_unit"] = f.tau_unit
+        features.append(item)
+    constraints = []
+    for c in profile.constraints:
+        item = {"id": c.id, "feature_id": c.feature_id, "type": c.type}
+        if c.type == "equals":
+            item["value"] = c.value
+        else:
+            item["limit"] = c.limit
+            item["unit"] = c.unit
+        if c.description:
+            item["description"] = c.description
+        constraints.append(item)
+    out: dict[str, Any] = {
+        "id": profile.id,
+        "version": profile.version,
+        "target_id": profile.target_id,
+        "calibration_status": profile.calibration_status,
+        "features": features,
+        "required_features": list(profile.required_features),
+        "constraints": constraints,
+        "declared_limitations": list(profile.declared_limitations),
+    }
+    if profile.dimension_weights is not None:
+        out["dimension_weights"] = dict(profile.dimension_weights)
+    if profile.description:
+        out["description"] = profile.description
+    return out
+
+
 def restrict_profile(
     profile: Profile,
     keep_features: Iterable[str],

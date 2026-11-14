@@ -25,7 +25,10 @@ profile (weights, scales τ, requirements), it:
 4. ranks only complete candidates that satisfy all requirements, and returns
    partial and excluded candidates separately, with reasons;
 5. reports a per-dimension breakdown (what is similar, how similar, what is
-   not) and the profile's declared limitations (what Earth cannot reproduce).
+   not) and the profile's declared limitations (what Earth cannot reproduce);
+6. can calibrate the weights so that known analogs rank high, with a
+   leave-one-out check, and then suggest new candidates
+   (`calibrate_weights`; demo: `python examples/calibration/run_calibration.py`).
 
 See [docs/math-model.md](docs/math-model.md) for the equations and
 [docs/data-contract.md](docs/data-contract.md) for input/output and errors.
@@ -92,7 +95,8 @@ src/analogue_engine/
   profiles.py       restrict_profile() for explicit, versioned reduction
   io.py             JSON bundle loader and long-format CSV loader/writer
   adapters.py       bridge to the backend wide table and its 0-100 similarity_scores
-tests/              153 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, review regressions)
+  calibration.py    weight calibration on known analogs (+ leave-one-out)
+tests/              166 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, calibration, review regressions)
 examples/           synthetic fixture, runner script, example outputs
 docs/               math model, data contract, Spanish guide
 ```

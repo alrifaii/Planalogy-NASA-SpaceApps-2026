@@ -9,6 +9,7 @@ Similarity is not operational suitability; see docs/math-model.md.
 """
 
 from .adapters import backend_payload, sites_from_wide_records
+from .calibration import CalibrationResult, CalibrationSettings, calibrate_weights
 from .engine import MODEL_ID, MODEL_VERSION, compare, rank
 from .errors import AnalogueEngineError, DataModeError, InvalidRequestError, ProfileError
 from .io import Bundle, load_bundle, load_sites_csv, loads_strict, parse_bundle, write_sites_csv
@@ -21,7 +22,7 @@ from .models import (
     ProfileFeature,
     Site,
 )
-from .profiles import restrict_profile
+from .profiles import profile_to_dict, restrict_profile
 from .results import (
     ComparisonResult,
     ComponentResult,
@@ -57,8 +58,12 @@ __all__ = [
     "RankingResult",
     "SensitivityReport",
     "Site",
+    "CalibrationResult",
+    "CalibrationSettings",
     "backend_payload",
+    "calibrate_weights",
     "compare",
+    "profile_to_dict",
     "sites_from_wide_records",
     "load_bundle",
     "load_sites_csv",

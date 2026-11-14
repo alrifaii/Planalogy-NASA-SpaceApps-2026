@@ -10,6 +10,7 @@ dist/
 # Generated example outputs (re-created by the example scripts)
 examples/output/
 examples/backend_bridge/output_*.json
+examples/calibration/output_*.json
 
 # Local working notes (kept out of the team repository)
 docs/guia_*

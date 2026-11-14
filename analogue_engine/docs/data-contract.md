@@ -286,7 +286,31 @@ results = run_assessment(target_id, mission_type, payload["similarity_scores"])
 * One engine profile per backend mission type. Today the backend's mission
   profiles list parameters but have no weights or scales.
 
-## 6. Integration notes for the recommender
+## 6. Weight calibration (for the AI / chat layer)
+
+```python
+from analogue_engine import calibrate_weights, CalibrationSettings
+
+cal = calibrate_weights(target, candidates, start_profile, feature_definitions,
+                        known_analogs=["site_id_1", "site_id_2", ...])
+cal.calibrated_profile            # profile dict, ready for rank()
+cal.calibrated_dimension_weights  # e.g. {"terrain": 0.24, "mineralogy": 0.23, ...}
+cal.start_summary / cal.calibrated_summary   # ranks of the known analogs
+cal.leave_one_out                 # hidden-site check
+cal.new_candidates                # best sites that are not known analogs
+cal.to_json()                     # strict JSON
+```
+
+* `start_profile` can be written by an AI from a mission description. The
+  engine validates it like any other profile, and the AI never produces scores.
+* Known analogs must be among the candidates and have the same features
+  measured. Incomplete ones are reported in `known_analogs_unusable`.
+* `CalibrationSettings(prior_strength=1.0, temperature=0.05, iterations=400, step=0.05)`.
+  A higher `prior_strength` keeps the weights closer to the start.
+* It runs in about 1 s for roughly 130 candidates with leave-one-out
+  (pure Python).
+
+## 7. Integration notes for the recommender
 
 * Similarity is evidence, not operational suitability. Activity
   recommendations need requirements agreed with science, applied by the

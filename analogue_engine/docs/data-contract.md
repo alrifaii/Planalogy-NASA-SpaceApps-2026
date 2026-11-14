@@ -252,6 +252,55 @@ Taxonomy required by the brief:
 | Incompatible comparison | `excluded`, category `incompatible` |
 | Requirement not met | `excluded`, category `requirement_not_met` |
 
+## 4b. Data team grid format (what the engine reads today)
+
+The Data team's current files **already work as they are**. Keep this
+format; the adapter is `examples/real_data/grid_1deg.py`.
+
+**Files**: `earth_1deg.csv` and `mars_1deg.csv` (later `moon_1deg.csv`),
+plus `parameters.csv` describing every column. Data files are not committed
+to this repository; the scripts take the folder as an argument:
+
+```bash
+python examples/real_data/run_real_grid.py <folder> gale
+```
+
+**Rules**
+1. One row per 1°×1° cell. `lat` and `lon` are cell centres (lat
+   89.5…−89.5, lon −179.5…179.5, east positive). Use the same grid and
+   column names on every planet.
+2. Units: one canonical unit per column, the same on every planet, as
+   listed in `parameters.csv` (K, Pa, m, W/m², 0–1, wt%…). Never mix °C and K.
+3. **Empty cell = no data.** Never write 0, −9999 or NaN for missing values.
+4. Classes (`rock_group`) use one shared vocabulary for all planets:
+   `volcanic, ancient_crust, sedimentary, evaporite_salt, ice, impact, water`.
+5. Flags are 0/1 (`ground_ice_flag`, `is_land`).
+6. In `parameters.csv`, keep the `comparable` column (`yes` / `no` /
+   `filter` / `helper`). Only `yes` columns can be scored across planets.
+
+**Columns the engine scores now** (Science P1–P10): `elevation_m` (only to
+derive regional relief), `surface_temp_swing_K`, `surface_temp_min_K`,
+`apparent_thermal_inertia` (as a within-planet percentile), `albedo`,
+`rock_group`, `crater_count` (as yes/no), `ground_ice_flag`. Earth
+pre-filter: `is_land`, `precipitation_mm_yr`, `ndvi`, `rock_group`.
+
+**Requested fixes and additions**
+* The Gale cell has `rock_group = impact`, which no Earth cell has, so P8
+  scores 0 everywhere. Science describes Gale as sedimentary; please confirm
+  the class for target cells.
+* `ground_ice_flag` on Earth only uses northern-hemisphere permafrost, so the
+  Antarctic Dry Valleys show no ice. Please add a southern-hemisphere source
+  if one exists.
+* If possible, add `slope_deg` and `roughness` per cell, computed from a
+  finer DEM with the same method on both planets. Today relief is
+  approximated from 3×3 cells.
+
+**Year slider**: one Earth file per year (or scenario), e.g.
+`earth_1deg_2030.csv`, `earth_1deg_2050.csv`. Each has the same columns and
+the same grid, and only the time-dependent columns change. Name the source
+and scenario in `parameters.csv`. Projected air temperature is not the same
+quantity as ground temperature; ask Science before mixing them.
+
 ## 5. Backend integration (branch `backend`, `integration.run_assessment`)
 
 The backend keeps a wide table (one row per location) and `run_assessment`

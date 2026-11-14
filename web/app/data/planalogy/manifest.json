@@ -1,48 +1,77 @@
 {
-  "schema": "planalogy.web.v1",
+  "schema": "planalogy.web.v2",
   "model": "analogue_engine.adapted_gower@0.2.0",
   "data_mode": "real",
-  "note": "Similarities precomputed by the analogue engine; the browser only applies weights.",
+  "grid_deg": 1,
   "features": [
     {
       "id": "regional_relief_m",
       "label": "Regional relief",
-      "category": "terrain"
+      "category": "terrain",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "m",
+      "tau": 3000
     },
     {
       "id": "surface_temp_swing_K",
       "label": "Day–night ground temperature swing",
-      "category": "thermal"
+      "category": "thermal",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "K",
+      "tau": 100
     },
     {
       "id": "surface_temp_min_K",
       "label": "Coldest ground temperature",
-      "category": "thermal"
+      "category": "thermal",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "K",
+      "tau": 100
     },
     {
       "id": "ati_percentile",
       "label": "Thermal inertia (rank within planet)",
-      "category": "thermophysical"
+      "category": "thermophysical",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "1",
+      "tau": 0.5
     },
     {
       "id": "albedo",
       "label": "Albedo",
-      "category": "optical"
+      "category": "optical",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "1",
+      "tau": 0.2
     },
     {
       "id": "rock_group",
       "label": "Rock type",
-      "category": "geology"
+      "category": "geology",
+      "kind": "categorical",
+      "comparator": "categorical_match_v1",
+      "unit": "class"
     },
     {
       "id": "inside_impact_structure",
       "label": "Impact structure",
-      "category": "craters"
+      "category": "craters",
+      "kind": "boolean",
+      "comparator": "boolean_match_v1",
+      "unit": "boolean"
     },
     {
       "id": "ground_ice_flag",
       "label": "Ground ice",
-      "category": "water"
+      "category": "water",
+      "kind": "boolean",
+      "comparator": "boolean_match_v1",
+      "unit": "boolean"
     }
   ],
   "categories": [
@@ -81,7 +110,6 @@
       "name": "Gale Crater (Curiosity)",
       "lat": -5.5,
       "lon": 137.5,
-      "id": "mars_-05.5_+137.5",
       "values": {
         "regional_relief_m": 2916.8438,
         "surface_temp_swing_K": 85.3348,
@@ -98,7 +126,6 @@
       "name": "Jezero Crater (Perseverance)",
       "lat": 18.5,
       "lon": 77.5,
-      "id": "mars_+18.5_+077.5",
       "values": {
         "regional_relief_m": 2177.5703,
         "surface_temp_swing_K": 77.0714,
@@ -115,7 +142,6 @@
       "name": "Arcadia Planitia (approx.)",
       "lat": 46.5,
       "lon": -167.5,
-      "id": "mars_+46.5_-167.5",
       "values": {
         "regional_relief_m": 35.96090000000004,
         "surface_temp_swing_K": 62.0172,
@@ -343,22 +369,20 @@
   "years": [
     "now"
   ],
+  "year_columns": [
+    "surface_temp_swing_K",
+    "surface_temp_min_K",
+    "ati_percentile",
+    "ground_ice_flag",
+    "dry_bare"
+  ],
   "files": {
-    "cells": {
-      "now": "cells.json"
+    "earth": {
+      "now": "earth.json"
     },
-    "sims": {
-      "gale": {
-        "now": "sims_gale.json"
-      },
-      "jezero": {
-        "now": "sims_jezero.json"
-      },
-      "arcadia": {
-        "now": "sims_arcadia.json"
-      }
-    }
+    "mars": "mars.json"
   },
+  "dry_bare_rule": "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)",
   "thresholds": {
     "strong_at_least": 75,
     "weak_at_most": 40

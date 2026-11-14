@@ -50,14 +50,17 @@ losing analogy.
 ## Web app (Planalogy)
 
 `web/app/` is the static web app. It has the 3D globe and an **Analog
-Finder**: pick a Mars target, choose a mission preset or set weights (by hand
-or by describing the mission to Claude), and every dry, bare 1° Earth cell is
-re-ranked in the browser. A heat map, the top sites and site cards update
-instantly.
+Finder**. Pick a Mars target (a preset site or **any point on Mars**), then
+choose a mission preset or set weights, by hand or by describing the mission
+to Claude. Every Earth land cell is re-ranked in the browser; by default only
+dry, bare land counts, and a switch turns that off. A heat map, the top sites
+and site cards update instantly.
 
-The browser does not run the engine. `backend/web_export.py` precomputes
-each cell's similarity to each target, and `web/app/js/scoring.js` only
-applies the weights. A test checks that it gives exactly the engine's ranking.
+`backend/web_export.py` exports the raw feature values of every Earth land
+cell and every Mars cell. `web/app/js/scoring.js` applies the engine's
+comparators, scales, weights and ordering. A test under Node.js checks that
+the similarities match the engine bit for bit and that the ranking is
+identical. Yearly Earth files only carry the climate-dependent columns.
 To refresh the data after new grid files, including yearly files for the
 year slider, run:
 

@@ -368,3 +368,13 @@ details summary{color:var(--accent2)}
 .f-legend{display:flex;align-items:center;gap:8px;padding:0 6px}
 .f-ramp{display:inline-block;width:110px;height:8px;border-radius:4px}
 @media (max-width:560px){.f-ramp{width:70px}}
+.f-pick{width:100%;margin-top:8px}
+.f-mypts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.f-mypts > .tiny{width:100%}
+.f-chip{cursor:pointer}
+.f-chip:hover{border-color:var(--accent);color:var(--text)}
+.f-custom{margin-top:10px;padding:10px 12px;border-radius:10px;border:1px solid rgba(209,139,85,.45);background:rgba(209,139,85,.08)}
+.f-custom-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.f-slider.off label{opacity:.55}
+.f-switch{display:flex;gap:10px;align-items:center;font-size:.88rem;cursor:pointer}
+.f-switch input{width:18px;height:18px;accent-color:var(--accent)}

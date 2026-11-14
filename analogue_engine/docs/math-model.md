@@ -143,6 +143,47 @@ rank goes from the top 14.9 % to the top 4.1 %. Leave-one-out improves the
 hidden ones that started far down (#54→#28, #33→#14, #20→#4); those already
 at the top stay or drop one place.
 
+## 4d. Rankings over time (`timeline.py`)
+
+`rank_over_years` ranks one fixed target with one fixed profile against each
+year's Earth sites, which can be observations or projections. Because τ,
+weights and requirements are fixed and no score depends on other sites, the
+change in a site's score between years comes only from its own data. Per
+site it reports scores and positions by year, the change (last − first), a
+least-squares trend per decade and a status: gaining or losing (|change| ≥
+threshold), stable, entering or leaving (present in only one end year). It
+also lists which sites entered or left the top k. Projection uncertainty is
+not propagated.
+
+## 4e. First run on the Data team's 1° grid (Gale)
+
+`examples/real_data/` maps the Data team's grid to the Science P1–P10
+decisions:
+* P1: regional relief from a 3×3 block of cells (provisional, coarse).
+* P2: ground temperature swing and cold minimum.
+* P3: apparent thermal inertia as a within-planet percentile.
+* P4: albedo.
+* P8: rock group, at half weight.
+* P9: impact yes/no.
+* P10: ground ice yes/no.
+* P5, P6 and P7 are not scored.
+
+The pre-filter keeps dry, bare land: precipitation < 500 mm/yr, NDVI < 0.2,
+not ice or water. That leaves 3561 Earth cells; 3148 have complete data.
+
+* **Results:** the best score is 73/100. The top cell is in the Atacama
+  (−23.5, −68.5). Kara-Kul ranks #2, the Atacama reference cell #222 (top
+  7 %) and Arizaro #285. The polar sites rank low, as Science expected for
+  ice-free Gale.
+* **Calibration** on Atacama, Arizaro and Kara-Kul changes the weights only
+  modestly: Atacama goes to #154 (leave-one-out #167) and Arizaro to #214
+  (leave-one-out #225).
+* **Data issues found:**
+  * Gale's rock group is `impact`, a class that does not exist on Earth, so
+    P8 scores 0 for every Earth cell.
+  * The Earth permafrost source covers only the northern hemisphere, so the
+    Dry Valleys get no ground ice.
+
 ## 5. Comparability, missing data and coverage
 
 Each pair of measurements passes a per-feature protocol check:

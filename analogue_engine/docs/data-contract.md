@@ -310,7 +310,36 @@ cal.to_json()                     # strict JSON
 * It runs in about 1 s for roughly 130 candidates with leave-one-out
   (pure Python).
 
-## 7. Integration notes for the recommender
+## 7. Year slider: rankings over time (`rank_over_years`)
+
+```python
+from analogue_engine import rank_over_years
+
+tl = rank_over_years(target, {2025: sites_2025, 2050: sites_2050, 2075: sites_2075},
+                     profile, feature_definitions,
+                     watch=[...known analog ids...], top_k=20)
+tl.top_by_year        # {year: [site ids]}
+tl.watched            # trajectories: score per year, trend per decade, status
+tl.emerging / tl.fading            # entered / left the top k between first and last year
+tl.biggest_gainers / tl.biggest_losers
+```
+
+* Pass one list of Earth sites per year, built from that year's data
+  (observations or projections). Use **the same site ids every year** (e.g.
+  `earth_<lat>_<lon>`). The target (Mars or Moon) and the profile stay fixed.
+* A site that does not pass the pre-filter in some year can be left out for
+  that year; its trajectory then shows null for that year.
+* Status values are `gaining`, `losing` (change ≥ `change_threshold`,
+  default 0.02 = 2 points), `stable`, `entering`, `leaving` and
+  `insufficient`.
+* Why it is meaningful: the scales are fixed and scores do not depend on the
+  other sites, so a change in a site's score comes only from its own data.
+* Put the year or scenario in each measurement's `temporal_support` (e.g.
+  `"projection:ssp245:2050"`). Ask Science which projected variables really
+  match the current ones. For example, climate models usually give the
+  *air* temperature range, not the *ground* day–night swing.
+
+## 8. Integration notes for the recommender
 
 * Similarity is evidence, not operational suitability. Activity
   recommendations need requirements agreed with science, applied by the

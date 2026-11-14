@@ -28,7 +28,15 @@ profile (weights, scales τ, requirements), it:
    not) and the profile's declared limitations (what Earth cannot reproduce);
 6. can calibrate the weights so that known analogs rank high, with a
    leave-one-out check, and then suggest new candidates
-   (`calibrate_weights`; demo: `python examples/calibration/run_calibration.py`).
+   (`calibrate_weights`; demo: `python examples/calibration/run_calibration.py`);
+7. can rank the same target year by year to show which sites gain or lose
+   analogy over time (`rank_over_years`, for the year slider).
+
+To run it on the Data team's 1° grid (the data is not in this repo):
+
+```bash
+python examples/real_data/run_real_grid.py <data_dir> gale
+```
 
 See [docs/math-model.md](docs/math-model.md) for the equations and
 [docs/data-contract.md](docs/data-contract.md) for input/output and errors.
@@ -96,7 +104,8 @@ src/analogue_engine/
   io.py             JSON bundle loader and long-format CSV loader/writer
   adapters.py       bridge to the backend wide table and its 0-100 similarity_scores
   calibration.py    weight calibration on known analogs (+ leave-one-out)
-tests/              166 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, calibration, review regressions)
+  timeline.py       rankings over years (gaining / losing analogs)
+tests/              171 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, calibration, timeline, review regressions)
 examples/           synthetic fixture, runner script, example outputs
 docs/               math model, data contract, Spanish guide
 ```

@@ -11,6 +11,7 @@ dist/
 examples/output/
 examples/backend_bridge/output_*.json
 examples/calibration/output_*.json
+examples/real_data/output_*
 
 # Local working notes (kept out of the team repository)
 docs/guia_*

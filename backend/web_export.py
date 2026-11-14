@@ -24,6 +24,7 @@ Output (default web/app/data/planalogy/, read by the Planalogy web app):
   mars.json                  every Mars cell: lat, lon, feature values
 
     python -m backend.web_export [--data data/grid_1deg] [--out web/app/data/planalogy] [--no-calibration]
+                                 [--scenario ssp245|ssp585]
 """
 
 from __future__ import annotations
@@ -39,19 +40,25 @@ from backend import engine_service as es
 from backend import grid_data as g
 from backend.analog_presets import CELLS, EARTH, PRESETS, cell_id
 
-FEATURES = ["regional_relief_m", "surface_temp_swing_K", "surface_temp_min_K", "ati_percentile",
-            "albedo", "rock_group", "inside_impact_structure", "ground_ice_flag"]
+FEATURES = ["slope_deg", "roughness_m", "relief_m", "surface_temp_swing_K",
+            "surface_temp_min_K", "air_temp_swing_K", "ati_percentile", "albedo", "mineral_groups", "rock_group",
+            "inside_impact_structure", "ground_ice_flag"]
 LABELS = {
-    "regional_relief_m": "Regional relief", "surface_temp_swing_K": "Day–night ground temperature swing",
+    "slope_deg": "Slope", "roughness_m": "Roughness", "relief_m": "Relief inside the cell",
+    "air_temp_swing_K": "Day–night air temperature swing", "mineral_groups": "Mineral groups (proxy)",
+    "regional_relief_m": "Regional relief (3×3 cells)", "surface_temp_swing_K": "Day–night ground temperature swing",
     "surface_temp_min_K": "Coldest ground temperature", "ati_percentile": "Thermal inertia (rank within planet)",
     "albedo": "Albedo", "rock_group": "Rock type", "inside_impact_structure": "Impact structure",
     "ground_ice_flag": "Ground ice",
 }
 CATEGORY_LABELS = {"terrain": "Terrain", "thermal": "Day–night temperature", "thermophysical": "Thermal inertia",
-                   "optical": "Albedo", "geology": "Rock type", "craters": "Impact structure", "water": "Ground ice"}
+                   "optical": "Albedo", "mineralogy": "Mineral groups", "geology": "Rock type", "craters": "Impact structure", "water": "Ground ice"}
 # Columns that change with climate (Science: "Future Mars analogs under climate change").
 # Yearly files carry only these, so each year adds about a third of the base size.
-YEAR_COLUMNS = ["surface_temp_swing_K", "surface_temp_min_K", "ati_percentile", "ground_ice_flag", "dry_bare"]
+YEAR_COLUMNS = ["surface_temp_swing_K", "surface_temp_min_K", "air_temp_swing_K", "ati_percentile",
+                "ground_ice_flag", "dry_bare"]
+# The Data team's projected files change air temperature (incl. air_temp_swing_K), precipitation and
+# aridity, so dry_bare (precipitation filter) and air_temp_swing_K move; the other columns stay as today.
 
 TARGET_KEYS = {"Gale Crater (Curiosity)": "gale", "Jezero Crater (Perseverance)": "jezero",
                "Arcadia Planitia (approx.)": "arcadia"}
@@ -66,6 +73,8 @@ def _feature_specs() -> list[dict[str, Any]]:
                 "comparator": d["comparator_id"], "unit": d["canonical_unit"]}
         if f in g.TAUS:
             spec["tau"] = g.TAUS[f][0]
+        if d.get("categories"):
+            spec["categories"] = d["categories"]
         out.append(spec)
     return out
 
@@ -120,15 +129,17 @@ def _preset_entry(preset: dict, data_dir: Path, calibrate: bool) -> dict[str, An
     }
 
 
-def export(data_dir: Path, out_dir: Path, calibrate: bool = True) -> dict[str, Any]:
+def export(data_dir: Path, out_dir: Path, calibrate: bool = True,
+           scenario: str | None = es.DEFAULT_SCENARIO) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    years = [None] + [y for y, _ in es.yearly_files(data_dir)]
+    yearly = dict(es.yearly_files(data_dir, scenario))
+    years = [None] + sorted(yearly)
     base = es.load_grid(str(data_dir))
     files: dict[str, Any] = {"earth": {}, "mars": "mars.json"}
     _write(out_dir / "mars.json", {"columns": ["lat", "lon"] + FEATURES, "rows": _mars_rows(base)})
     full_cols = ["id", "lat", "lon"] + FEATURES + ["dry_bare"]
     for year in years:
-        data = base if year is None else es.load_grid(str(data_dir), f"earth_1deg_{year}.csv")
+        data = base if year is None else es.load_grid(str(data_dir), yearly[year])
         rows = _earth_rows(data)
         if year is None:
             name, payload = "earth.json", {"columns": full_cols, "rows": rows}
@@ -153,6 +164,11 @@ def export(data_dir: Path, out_dir: Path, calibrate: bool = True) -> dict[str, A
         "targets": targets,
         "presets": [_preset_entry(p, data_dir, calibrate) for p in PRESETS],
         "years": ["now"] + [y for y in years if y is not None],
+        "scenario": scenario if yearly and "/" in next(iter(yearly.values())) else None,
+        "scenarios_available": es.scenarios(data_dir),
+        "future_note": "Yearly files: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. day-night "
+                       "air swing, precipitation (dry/bare filter), aridity. NDVI, ground temperature, terrain, rock "
+                       "type, craters and albedo stay as today (no projection).",
         "year_columns": YEAR_COLUMNS,
         "files": files,
         "dry_bare_rule": "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)",
@@ -172,9 +188,12 @@ def main(argv: list[str]) -> None:
     data_dir, out_dir = es.GRID_DIR, es.PROJECT_ROOT / "web" / "app" / "data" / "planalogy"
     if "--data" in args:
         i = args.index("--data"); data_dir = Path(args[i + 1]); del args[i:i + 2]
+    scenario = es.DEFAULT_SCENARIO
+    if "--scenario" in args:
+        i = args.index("--scenario"); scenario = args[i + 1]; del args[i:i + 2]
     if "--out" in args:
         i = args.index("--out"); out_dir = Path(args[i + 1]); del args[i:i + 2]
-    m = export(data_dir, out_dir, calibrate="--no-calibration" not in args)
+    m = export(data_dir, out_dir, calibrate="--no-calibration" not in args, scenario=scenario)
     sizes = {p.name: p.stat().st_size for p in sorted(out_dir.glob("*.json"))}
     print(f"exported to {out_dir}: years {m['years']}; files {sizes}")
 

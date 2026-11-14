@@ -128,7 +128,7 @@ def make_profile(
     constraints: list[dict] | None = None,
     required: list[str] | None = None,
     extra_limitations: list[str] | None = None,
-    version: str = "0.1.0",
+    version: str = "0.2.0",
 ) -> dict[str, Any]:
     """Build a profile over the grid features; scales come from TAUS."""
     features = []

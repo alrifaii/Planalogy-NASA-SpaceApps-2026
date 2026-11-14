@@ -314,9 +314,10 @@ by the Data team's `prepare_future.py` from WorldClim 2.1 CMIP6 projections
 (multi-model ensemble mean; year = middle of the 20-year period 2021–2040 …
 2081–2100). Same grid and columns as today's file. Changed: `air_temp_*`
 including `air_temp_swing_K`, `precipitation_mm_yr`, `aridity_index`,
-`aridity_class`. Emptied (no projection, so the filter treats them as
-unknown): `ndvi`, `soil_moisture_pct`, `vapour_pressure_kPa`. Everything else
-stays as today. Extra helper columns: `n_models`, `air_temp_change_K`,
+`aridity_class`. `ndvi` keeps today's value (no projection; an empty NDVI
+would let every low-rain cell pass the filter and fake a climate effect).
+Emptied (no projection, not used): `soil_moisture_pct`, `vapour_pressure_kPa`.
+Everything else stays as today. Extra helper columns: `n_models`, `air_temp_change_K`,
 `precipitation_change_pct`, `precipitation_spread_mm_yr`,
 `aridity_class_today`. Ground temperature is not projected; ask Science before
 deriving it from air temperature.

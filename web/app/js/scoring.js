@@ -3,6 +3,7 @@
  * Similarity per feature, with the engine's comparators and fixed scales (from the manifest):
  *   clipped_linear_v1:      s = 1 − min(1, |x − t| / τ)
  *   categorical / boolean:  s = 1 if x == t else 0
+ *   jaccard_v1 (sets):      s = |x ∩ t| / |x ∪ t|  (two empty sets: 1)
  *   missing value:          no similarity (never 0)
  * Score of a cell: Σ w_j s_j / Σ w_j, with the engine's effective weights
  *   w_j = (W_g / Σ W) · (a_j / Σ_{k in g} a_k).
@@ -67,6 +68,12 @@
         const f = feats[j], x = row[ix[f.id]], t = targetValues[f.id];
         if (x === null || x === undefined || t === null || t === undefined) { s[j] = null; continue; }
         if (f.comparator === 'clipped_linear_v1') { const d = Math.min(1.0, Math.abs(x - t) / f.tau); s[j] = 1.0 - d; }
+        else if (f.comparator === 'jaccard_v1') {
+          const a = new Set(x), b = new Set(t);
+          let shared = 0; a.forEach(v => { if (b.has(v)) shared++; });
+          const union = a.size + b.size - shared;
+          s[j] = union === 0 ? 1.0 : shared / union;
+        }
         else s[j] = x === t ? 1.0 : 0.0;
       }
       byId[row[ix.id]] = s;

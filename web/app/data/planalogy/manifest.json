@@ -5,13 +5,31 @@
   "grid_deg": 1,
   "features": [
     {
-      "id": "regional_relief_m",
-      "label": "Regional relief",
+      "id": "slope_deg",
+      "label": "Slope",
+      "category": "terrain",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "deg",
+      "tau": 5
+    },
+    {
+      "id": "roughness_m",
+      "label": "Roughness",
       "category": "terrain",
       "kind": "scalar",
       "comparator": "clipped_linear_v1",
       "unit": "m",
-      "tau": 3000
+      "tau": 1500
+    },
+    {
+      "id": "relief_m",
+      "label": "Relief inside the cell",
+      "category": "terrain",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "m",
+      "tau": 4000
     },
     {
       "id": "surface_temp_swing_K",
@@ -32,6 +50,15 @@
       "tau": 100
     },
     {
+      "id": "air_temp_swing_K",
+      "label": "Day–night air temperature swing",
+      "category": "thermal",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "K",
+      "tau": 50
+    },
+    {
       "id": "ati_percentile",
       "label": "Thermal inertia (rank within planet)",
       "category": "thermophysical",
@@ -50,12 +77,37 @@
       "tau": 0.2
     },
     {
+      "id": "mineral_groups",
+      "label": "Mineral groups (proxy)",
+      "category": "mineralogy",
+      "kind": "set",
+      "comparator": "jaccard_v1",
+      "unit": "set",
+      "categories": [
+        "basaltic",
+        "felsic",
+        "clays_hydrated",
+        "sulfates_salts",
+        "carbonates",
+        "iron_oxides"
+      ]
+    },
+    {
       "id": "rock_group",
       "label": "Rock type",
       "category": "geology",
       "kind": "categorical",
       "comparator": "categorical_match_v1",
-      "unit": "class"
+      "unit": "class",
+      "categories": [
+        "volcanic",
+        "ancient_crust",
+        "sedimentary",
+        "evaporite_salt",
+        "ice",
+        "impact",
+        "water"
+      ]
     },
     {
       "id": "inside_impact_structure",
@@ -92,6 +144,10 @@
       "label": "Albedo"
     },
     {
+      "id": "mineralogy",
+      "label": "Mineral groups"
+    },
+    {
       "id": "geology",
       "label": "Rock type"
     },
@@ -111,12 +167,19 @@
       "lat": -5.5,
       "lon": 137.5,
       "values": {
-        "regional_relief_m": 2916.8438,
+        "slope_deg": 3.1618,
+        "roughness_m": 962.708,
+        "relief_m": 3978.7849,
         "surface_temp_swing_K": 85.3348,
         "surface_temp_min_K": 184.1475,
-        "ati_percentile": 0.26825434540237236,
+        "air_temp_swing_K": 43.9538,
+        "ati_percentile": 0.2264969135802469,
         "albedo": 0.2181,
-        "rock_group": "impact",
+        "mineral_groups": [
+          "basaltic",
+          "clays_hydrated"
+        ],
+        "rock_group": "sedimentary",
         "inside_impact_structure": true,
         "ground_ice_flag": false
       }
@@ -127,11 +190,18 @@
       "lat": 18.5,
       "lon": 77.5,
       "values": {
-        "regional_relief_m": 2177.5703,
+        "slope_deg": 1.0819,
+        "roughness_m": 252.8946,
+        "relief_m": 833.7354,
         "surface_temp_swing_K": 77.0714,
         "surface_temp_min_K": 191.1525,
-        "ati_percentile": 0.4777840732549851,
+        "air_temp_swing_K": 37.3403,
+        "ati_percentile": 0.4034104938271605,
         "albedo": 0.1746,
+        "mineral_groups": [
+          "basaltic",
+          "clays_hydrated"
+        ],
         "rock_group": "sedimentary",
         "inside_impact_structure": true,
         "ground_ice_flag": false
@@ -143,11 +213,18 @@
       "lat": 46.5,
       "lon": -167.5,
       "values": {
-        "regional_relief_m": 35.96090000000004,
+        "slope_deg": 0.0344,
+        "roughness_m": 5.6957,
+        "relief_m": 23.0967,
         "surface_temp_swing_K": 62.0172,
         "surface_temp_min_K": 155.3111,
-        "ati_percentile": 0.5643814084404072,
+        "air_temp_swing_K": 32.114,
+        "ati_percentile": 0.4765277777777778,
         "albedo": 0.2485,
+        "mineral_groups": [
+          "basaltic",
+          "clays_hydrated"
+        ],
         "rock_group": "volcanic",
         "inside_impact_structure": false,
         "ground_ice_flag": false
@@ -162,29 +239,34 @@
       "why": "Terrain decides mobility; surface material (thermal inertia, albedo) separates dunes, gravel and bedrock.",
       "target": "gale",
       "category_weights": {
-        "terrain": 0.3313105292418278,
-        "thermal": 0.08967159430225008,
-        "thermophysical": 0.13022666156522353,
-        "optical": 0.1897742891996808,
-        "geology": 0.08230210372212803,
-        "craters": 0.0888161506194161,
-        "water": 0.08789867134947377
+        "terrain": 0.36424073420030956,
+        "thermal": 0.0911041999755604,
+        "thermophysical": 0.12401482938135878,
+        "optical": 0.18453146174780516,
+        "mineralogy": 0.03076692577016949,
+        "geology": 0.023399134158944394,
+        "craters": 0.09463514396518466,
+        "water": 0.0873075708006675
       },
       "feature_weights": {
-        "regional_relief_m": 0.3313105292418278,
-        "surface_temp_swing_K": 0.06294365365741073,
-        "surface_temp_min_K": 0.02672794064483935,
-        "ati_percentile": 0.13022666156522353,
-        "albedo": 0.1897742891996808,
-        "rock_group": 0.08230210372212803,
-        "inside_impact_structure": 0.0888161506194161,
-        "ground_ice_flag": 0.08789867134947377
+        "slope_deg": 0.12688590037290357,
+        "roughness_m": 0.11898015149387076,
+        "relief_m": 0.11837468233353522,
+        "surface_temp_swing_K": 0.04752399169109649,
+        "surface_temp_min_K": 0.02159631436992101,
+        "air_temp_swing_K": 0.021983893914542904,
+        "ati_percentile": 0.12401482938135878,
+        "albedo": 0.18453146174780516,
+        "mineral_groups": 0.03076692577016949,
+        "rock_group": 0.023399134158944394,
+        "inside_impact_structure": 0.09463514396518466,
+        "ground_ice_flag": 0.0873075708006675
       },
       "requirements": [],
       "required_features": [],
       "weights_used": "calibrated",
       "verdict": "accepted",
-      "verdict_reason": "hidden analogs: mean rank 172 -> 160 (+7.0%), 2/3 improved; threshold 5% and half improved",
+      "verdict_reason": "hidden analogs: mean rank 401 -> 321 (+20.0%), 2/3 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -216,6 +298,7 @@
       "category_weights": {
         "craters": 0.5,
         "geology": 2.0,
+        "mineralogy": 1.0,
         "optical": 1.0,
         "terrain": 1.0,
         "thermal": 0.5,
@@ -223,11 +306,15 @@
         "water": 0.5
       },
       "feature_weights": {
-        "regional_relief_m": 1.0,
+        "slope_deg": 1.0,
+        "roughness_m": 1.0,
+        "relief_m": 1.0,
         "surface_temp_swing_K": 2.0,
         "surface_temp_min_K": 1.0,
+        "air_temp_swing_K": 1.0,
         "ati_percentile": 1.0,
         "albedo": 1.0,
+        "mineral_groups": 1.0,
         "rock_group": 1.0,
         "inside_impact_structure": 1.0,
         "ground_ice_flag": 1.0
@@ -236,7 +323,7 @@
       "required_features": [],
       "weights_used": "science (start)",
       "verdict": "rejected",
-      "verdict_reason": "hidden analogs: mean rank 1745 -> 1734 (+0.6%), 1/2 improved; threshold 5% and half improved",
+      "verdict_reason": "hidden analogs: mean rank 1751 -> 1713 (+2.2%), 2/2 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -264,6 +351,7 @@
       "category_weights": {
         "craters": 0.0,
         "geology": 0.0,
+        "mineralogy": 0.0,
         "optical": 1.0,
         "terrain": 0.25,
         "thermal": 3.0,
@@ -271,11 +359,15 @@
         "water": 0.5
       },
       "feature_weights": {
-        "regional_relief_m": 1.0,
+        "slope_deg": 1.0,
+        "roughness_m": 1.0,
+        "relief_m": 1.0,
         "surface_temp_swing_K": 2.0,
         "surface_temp_min_K": 1.0,
+        "air_temp_swing_K": 1.0,
         "ati_percentile": 1.0,
         "albedo": 1.0,
+        "mineral_groups": 1.0,
         "rock_group": 1.0,
         "inside_impact_structure": 1.0,
         "ground_ice_flag": 1.0
@@ -284,7 +376,7 @@
       "required_features": [],
       "weights_used": "science (start)",
       "verdict": "rejected",
-      "verdict_reason": "hidden analogs: mean rank 943 -> 998 (-5.9%), 2/3 improved; threshold 5% and half improved",
+      "verdict_reason": "hidden analogs: mean rank 955 -> 970 (-1.6%), 1/3 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -316,6 +408,7 @@
       "category_weights": {
         "craters": 0.0,
         "geology": 0.5,
+        "mineralogy": 0.0,
         "optical": 0.5,
         "terrain": 1.0,
         "thermal": 2.0,
@@ -323,11 +416,15 @@
         "water": 0.0
       },
       "feature_weights": {
-        "regional_relief_m": 1.0,
+        "slope_deg": 1.0,
+        "roughness_m": 1.0,
+        "relief_m": 1.0,
         "surface_temp_swing_K": 2.0,
         "surface_temp_min_K": 1.0,
+        "air_temp_swing_K": 1.0,
         "ati_percentile": 1.0,
         "albedo": 1.0,
+        "mineral_groups": 1.0,
         "rock_group": 1.0,
         "inside_impact_structure": 1.0,
         "ground_ice_flag": 0.0
@@ -367,18 +464,33 @@
     }
   ],
   "years": [
-    "now"
+    "now",
+    2030,
+    2050,
+    2070,
+    2090
   ],
+  "scenario": "ssp245",
+  "scenarios_available": [
+    "ssp245",
+    "ssp585"
+  ],
+  "future_note": "Yearly files: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. day-night air swing, precipitation (dry/bare filter), aridity. NDVI, ground temperature, terrain, rock type, craters and albedo stay as today (no projection).",
   "year_columns": [
     "surface_temp_swing_K",
     "surface_temp_min_K",
+    "air_temp_swing_K",
     "ati_percentile",
     "ground_ice_flag",
     "dry_bare"
   ],
   "files": {
     "earth": {
-      "now": "earth.json"
+      "now": "earth.json",
+      "2030": "earth_2030.json",
+      "2050": "earth_2050.json",
+      "2070": "earth_2070.json",
+      "2090": "earth_2090.json"
     },
     "mars": "mars.json"
   },

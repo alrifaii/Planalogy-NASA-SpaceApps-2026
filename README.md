@@ -37,15 +37,23 @@ missing), a heat map of every scored cell, map points, the calibration
 verdict and the declared limitations. The first run calibrates each preset
 (about 20 s) and caches the result in `data/preset_profiles.json`.
 
-**Year slider:** add `data/grid_1deg/earth_1deg_<year>.csv` files with the
-same columns and grid, then:
+**Year slider (climate change):** the Data team's projected Earth files are in
+`data/grid_1deg/ssp245/` and `data/grid_1deg/ssp585/` (`earth_1deg_<year>.csv` for 2030, 2050, 2070,
+2090; WorldClim 2.1 CMIP6, 6-model mean). Today's file is the baseline (1985 = middle of 1970-2000):
 
 ```bash
-python -m backend.engine_service --years
+python -m backend.engine_service --years                    # SSP2-4.5
+python -m backend.engine_service --years --scenario ssp585  # high emissions
 ```
 
-This writes `data/results/<preset>_years.json` with the sites gaining or
-losing analogy.
+This writes `data/results/<preset>_years_<scenario>.json` with the sites gaining or
+losing analogy. What changes in the future files: air temperature (incl. the
+day-night air swing, scored in P2), precipitation (dry/bare filter) and aridity;
+see `data/grid_1deg/README.md`.
+
+**Settings for a GUI:** `analogue_engine/examples/real_data/analysis_config.json`
+switches every parameter on/off (`use` 1/0) and sets its weight; defaults are the
+Science P1-P10 recommendation (`run_config.py`, data contract section 9).
 
 Yearly files can be **climate projections only** (`lat`, `lon`,
 `air_temp_swing_K`, `air_temp_min_K`, `precipitation_mm_yr`,
@@ -91,7 +99,8 @@ To refresh the data after new grid files, including yearly files for the
 year slider, run:
 
 ```bash
-python -m backend.web_export
+python -m backend.web_export                     # years from data/grid_1deg/ssp245/
+python -m backend.web_export --scenario ssp585   # or the high-emission scenario
 ```
 
 The app is published as a Claude artifact. Any static host also works:

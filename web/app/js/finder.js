@@ -16,7 +16,7 @@ const REGION = {
   '-24.5,-69.5': 'Atacama core (Yungay), Chile', '-24.5,-67.5': 'Salar de Arizaro', '39.5,73.5': 'Kara-Kul, Pamir',
   '-77.5,161.5': 'McMurdo Dry Valleys', '75.5,-89.5': 'Devon Island (Haughton)', '39.5,99.5': 'Hexi Corridor, Gansu'
 };
-const DEFAULT_FW = {regional_relief_m:1, surface_temp_swing_K:2, surface_temp_min_K:1, ati_percentile:1, albedo:1, rock_group:1, inside_impact_structure:1, ground_ice_flag:1};
+const DEFAULT_FW = {slope_deg:1, roughness_m:1, relief_m:1, surface_temp_swing_K:2, surface_temp_min_K:1, air_temp_swing_K:1, ati_percentile:1, albedo:1, mineral_groups:1, rock_group:1, inside_impact_structure:1, ground_ice_flag:1};
 const cache = {};
 /* JSON or gzip-compressed JSON (.json.gz, used for fine grids). Gzip is detected from the bytes, so it also works
    when a server already decoded it. */
@@ -386,7 +386,7 @@ TT.pages.finder = function(root){
     const prompt = [
       'You set priorities for an Earth-analog search engine for Mars missions. You never score sites; a transparent model does that. You only choose how much each category matters.',
       'Categories (weight 0-5, 0 = ignore):\n' + catsTxt,
-      'Meaning: terrain = regional relief (mobility, landing); thermal = day-night ground temperature swing and cold nights (instruments, thermal design); thermophysical = thermal inertia, i.e. loose dust vs gravel vs bedrock (trafficability, drilling); optical = albedo (surface brightness, imaging, solar heating); geology = rock type (sample science, water history); craters = inside an impact structure; water = ground ice similarity to the target.',
+      'Meaning: terrain = slope, roughness and relief (mobility, landing); thermal = day-night ground and air temperature swing and cold nights (instruments, thermal design); thermophysical = thermal inertia, i.e. loose dust vs gravel vs bedrock (trafficability, drilling); optical = albedo (surface brightness, imaging, solar heating); mineralogy = mineral groups such as basaltic, clays, sulfates (sample science, water history; a coarse proxy); geology = rock type (sample science, water history); craters = inside an impact structure; water = ground ice similarity to the target.',
       'Science rules: atmosphere, pressure, sunlight, UV, dust and gravity are never scored (Earth cannot reproduce them): list them under not_reproducible when the mission depends on them (e.g. helicopter flight depends on air density). Rock type overlaps with minerals, so keep geology moderate unless the mission is about samples. If the mission needs ground ice to exist at the test site (drilling, extraction), set require_ground_ice true and water to 0. Use at most two categories at 5. Prefer moderate weights when unsure.',
       'Mars targets: gale (Gale Crater, ice-free sedimentary crater, Curiosity), jezero (Jezero Crater, river delta and lake sediments, Perseverance), arcadia (Arcadia Planitia, northern plains with shallow ground ice)' + (st.target === 'custom' ? ', custom (the point the user picked: ' + st.custom.name + ')' : '') + '. Pick the target that fits the mission; if none is implied keep "' + keep + '".',
       'Examples (category weights):\n' + presetsTxt,

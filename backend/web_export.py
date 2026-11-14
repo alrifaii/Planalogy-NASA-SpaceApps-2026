@@ -37,7 +37,7 @@ hyper-arid land (< 0.05); without it the files are exactly as before.
   mars.json[.gz]             every Mars cell: lat, lon, feature values
 
     python -m backend.web_export [--data data/grid_1deg] [--out web/app/data/planalogy]
-                                 [--no-calibration] [--gzip | --no-gzip]
+                                 [--no-calibration] [--gzip | --no-gzip] [--scenario ssp245|ssp585]
 """
 
 from __future__ import annotations
@@ -54,19 +54,25 @@ from backend import engine_service as es
 from backend import grid_data as g
 from backend.analog_presets import CELLS, PRESETS, analog_id, target_key
 
-FEATURES = ["regional_relief_m", "surface_temp_swing_K", "surface_temp_min_K", "ati_percentile",
-            "albedo", "rock_group", "inside_impact_structure", "ground_ice_flag"]
+FEATURES = ["slope_deg", "roughness_m", "relief_m", "surface_temp_swing_K",
+            "surface_temp_min_K", "air_temp_swing_K", "ati_percentile", "albedo", "mineral_groups", "rock_group",
+            "inside_impact_structure", "ground_ice_flag"]
 LABELS = {
-    "regional_relief_m": "Regional relief", "surface_temp_swing_K": "Day–night ground temperature swing",
+    "slope_deg": "Slope", "roughness_m": "Roughness", "relief_m": "Relief inside the cell",
+    "air_temp_swing_K": "Day–night air temperature swing", "mineral_groups": "Mineral groups (proxy)",
+    "regional_relief_m": "Regional relief (3×3 cells)", "surface_temp_swing_K": "Day–night ground temperature swing",
     "surface_temp_min_K": "Coldest ground temperature", "ati_percentile": "Thermal inertia (rank within planet)",
     "albedo": "Albedo", "rock_group": "Rock type", "inside_impact_structure": "Impact structure",
     "ground_ice_flag": "Ground ice",
 }
 CATEGORY_LABELS = {"terrain": "Terrain", "thermal": "Day–night temperature", "thermophysical": "Thermal inertia",
-                   "optical": "Albedo", "geology": "Rock type", "craters": "Impact structure", "water": "Ground ice"}
+                   "optical": "Albedo", "mineralogy": "Mineral groups", "geology": "Rock type", "craters": "Impact structure", "water": "Ground ice"}
 # Columns that change with climate (Science: "Future Mars analogs under climate change").
 # Yearly files carry only these, so each year adds about a third of the base size.
-YEAR_COLUMNS = ["surface_temp_swing_K", "surface_temp_min_K", "ati_percentile", "ground_ice_flag", "dry_bare"]
+YEAR_COLUMNS = ["surface_temp_swing_K", "surface_temp_min_K", "air_temp_swing_K", "ati_percentile",
+                "ground_ice_flag", "dry_bare"]
+# The Data team's projected files change air temperature (incl. air_temp_swing_K), precipitation and
+# aridity, so dry_bare (precipitation filter) and air_temp_swing_K move; the other columns stay as today.
 
 TARGET_KEYS = {"Gale Crater (Curiosity)": "gale", "Jezero Crater (Perseverance)": "jezero",
                "Arcadia Planitia (approx.)": "arcadia"}
@@ -82,6 +88,8 @@ def _feature_specs() -> list[dict[str, Any]]:
                 "comparator": d["comparator_id"], "unit": d["canonical_unit"]}
         if f in g.TAUS:
             spec["tau"] = g.TAUS[f][0]
+        if d.get("categories"):
+            spec["categories"] = d["categories"]
         out.append(spec)
     return out
 
@@ -141,31 +149,49 @@ def _preset_entry(preset: dict, data_dir: Path, calibrate: bool, data: dict) -> 
     }
 
 
-def export(data_dir: Path, out_dir: Path, calibrate: bool = True, compress: bool | None = None) -> dict[str, Any]:
-    """Write the app's data files. ``compress``: None = gzip only if over SIZE_BUDGET."""
+SCENARIO_LABELS = {"ssp245": "SSP2-4.5 · middle of the road", "ssp585": "SSP5-8.5 · high emissions"}
+FUTURE_NOTE = ("Future years: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. the day-night "
+               "air swing, precipitation and aridity (dry-land filter). NDVI, ground temperature, terrain, rock type, "
+               "craters and albedo stay as today (no projection). The app interpolates linearly between the "
+               "projected years.")
+
+
+def export(
+    data_dir: Path,
+    out_dir: Path,
+    calibrate: bool = True,
+    compress: bool | None = None,
+    scenario: str | None = None,
+) -> dict[str, Any]:
+    """Write the app's data files.
+
+    ``compress``: None = gzip only if over SIZE_BUDGET. ``scenario``: export
+    one climate scenario folder (e.g. "ssp585"); None = every scenario folder
+    found (the app switches between them), or the yearly files lying directly
+    in data_dir when there are no scenario folders.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
-    years = [None] + es.yearly_files(data_dir)
     base = es.load_grid(str(data_dir))
+    found = es.scenarios(data_dir)
+    scen_ids: list[str | None] = [scenario] if scenario else (found or [None])
 
     payloads: dict[str, dict] = {"mars": {"columns": ["lat", "lon"] + FEATURES, "rows": _mars_rows(base)}}
     aridity = base["has_aridity"]
     extra = ["aridity_index"] if aridity else []
     full_cols = ["id", "lat", "lon"] + FEATURES + ["dry_bare"] + extra
     year_cols = ["id"] + YEAR_COLUMNS + extra
-    earth_names: dict[str, str] = {}
-    for item in years:
-        if item is None:
-            name, payload = "earth", {"columns": full_cols, "rows": _earth_rows(base, aridity)}
-        else:
-            year, fname = item
+    keep = [full_cols.index(c) for c in year_cols]
+    payloads["earth"] = {"columns": full_cols, "rows": _earth_rows(base, aridity)}
+    scen_files: dict[str | None, dict[str, str]] = {}
+    for scen in scen_ids:
+        scen_files[scen] = {}
+        for year, fname in es.yearly_files(data_dir, scen):
+            name = f"earth_{scen}_{year}" if scen else f"earth_{year}"
             rows = _earth_rows(es.load_grid(str(data_dir), fname), aridity)
-            keep = [full_cols.index(c) for c in year_cols]
-            name, payload = f"earth_{year}", {"columns": year_cols, "base": "earth.json",
-                                              "rows": [[r[i] for i in keep] for r in rows]}
-        payloads[name] = payload
-        earth_names["now" if item is None else str(item[0])] = name
+            payloads[name] = {"columns": year_cols, "base": "earth.json", "rows": [[r[i] for i in keep] for r in rows]}
+            scen_files[scen][str(year)] = name
 
-    blobs = {name: _encode(p) for name, p in payloads.items()}
+    blobs = {name: _encode(pl) for name, pl in payloads.items()}
     use_gzip = sum(len(b) for b in blobs.values()) > SIZE_BUDGET if compress is None else compress
     ext = ".json.gz" if use_gzip else ".json"
     written = set()
@@ -180,7 +206,14 @@ def export(data_dir: Path, out_dir: Path, calibrate: bool = True, compress: bool
         for stale in out_dir.glob(pattern):
             if stale.name not in written:
                 stale.unlink()
-    files: dict[str, Any] = {"earth": {k: v + ext for k, v in earth_names.items()}, "mars": "mars" + ext}
+
+    first = scen_ids[0]
+    files: dict[str, Any] = {"earth": {"now": "earth" + ext, **{y: n + ext for y, n in scen_files[first].items()}},
+                             "mars": "mars" + ext}
+    scenario_list = [{"id": sc, "label": SCENARIO_LABELS.get(sc, sc),
+                      "years": [int(y) for y in files_],
+                      "files": {y: n + ext for y, n in files_.items()}}
+                     for sc, files_ in scen_files.items() if sc and files_]
 
     targets = []
     for n in CELLS:
@@ -200,7 +233,12 @@ def export(data_dir: Path, out_dir: Path, calibrate: bool = True, compress: bool
         "categories": [{"id": c, "label": l} for c, l in CATEGORY_LABELS.items()],
         "targets": targets,
         "presets": [_preset_entry(p, data_dir, calibrate, base) for p in PRESETS],
-        "years": ["now"] + [y for y, _ in years[1:]],
+        "years": ["now"] + [int(y) for y in scen_files[first]],
+        "baseline_year": es.BASELINE_YEAR,
+        "scenario": first,
+        "scenarios": scenario_list,
+        "scenarios_available": found,
+        "future_note": FUTURE_NOTE,
         "year_columns": YEAR_COLUMNS,
         "files": files,
         "compression": "gzip" if use_gzip else "none",
@@ -220,10 +258,14 @@ def main(argv: list[str]) -> None:
     data_dir, out_dir = es.GRID_DIR, es.PROJECT_ROOT / "web" / "app" / "data" / "planalogy"
     if "--data" in args:
         i = args.index("--data"); data_dir = Path(args[i + 1]); del args[i:i + 2]
+    scenario = None  # all scenario folders
+    if "--scenario" in args:
+        i = args.index("--scenario"); scenario = args[i + 1]; del args[i:i + 2]
     if "--out" in args:
         i = args.index("--out"); out_dir = Path(args[i + 1]); del args[i:i + 2]
     compress = True if "--gzip" in args else False if "--no-gzip" in args else None
-    m = export(data_dir, out_dir, calibrate="--no-calibration" not in args, compress=compress)
+    m = export(data_dir, out_dir, calibrate="--no-calibration" not in args, compress=compress,
+               scenario=scenario)
     sizes = {p.name: p.stat().st_size for p in sorted(out_dir.glob("*.json*"))}
     grid = m["grid"]
     print(f"exported to {out_dir}: grid Earth {grid['earth']['lat_step']} deg / Mars {grid['mars']['lat_step']} deg "

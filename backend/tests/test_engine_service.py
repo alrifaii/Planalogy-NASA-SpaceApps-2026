@@ -18,7 +18,9 @@ from backend.analog_presets import CELLS
 
 COLUMNS = ["lat", "lon", "is_land", "elevation_m", "surface_temp_swing_K", "surface_temp_min_K",
            "apparent_thermal_inertia", "albedo", "rock_group", "crater_count", "ground_ice_flag",
-           "precipitation_mm_yr", "ndvi"]
+           "precipitation_mm_yr", "ndvi", "slope_deg", "roughness_m", "relief_m", "air_temp_swing_K",
+           "mineral_groups"]
+MINERALS = ["basaltic|clays_hydrated", "felsic|clays_hydrated", "carbonates", "basaltic", "sulfates_salts|carbonates"]
 
 
 def _earth_rows(swing_shift: float = 0.0):
@@ -33,6 +35,8 @@ def _earth_rows(swing_shift: float = 0.0):
                 "rock_group": ["sedimentary", "volcanic", "ancient_crust"][k % 3],
                 "crater_count": 1 if k % 7 == 0 else 0, "ground_ice_flag": 1 if k % 4 == 0 else 0,
                 "precipitation_mm_yr": 100, "ndvi": 0.1,
+                "slope_deg": 0.2 + 0.1 * k, "roughness_m": 40 + 10 * k, "relief_m": 200 + 50 * ((i * j) % 5),
+                "air_temp_swing_K": 6 + 0.4 * k + (swing_shift if k == 12 else 0), "mineral_groups": MINERALS[k % 5],
             })
     return rows
 
@@ -48,6 +52,8 @@ def _mars_rows():
                     "surface_temp_swing_K": 80, "surface_temp_min_K": 185, "apparent_thermal_inertia": 0.01,
                     "albedo": 0.2, "rock_group": "sedimentary", "crater_count": 5, "ground_ice_flag": 0,
                     "precipitation_mm_yr": "", "ndvi": "",
+                    "slope_deg": 3.2, "roughness_m": 900 + 50 * dlat, "relief_m": 3900, "air_temp_swing_K": 44,
+                    "mineral_groups": "basaltic|clays_hydrated",
                 })
     return rows
 
@@ -114,3 +120,15 @@ def test_year_slider(grid):
     assert out["years"] == [2030, 2050]
     gainers = {t["candidate_id"]: t for t in out["biggest_gainers"]}
     assert gainers["earth_+22.5_+012.5"]["status"] == "gaining"
+
+
+def test_year_slider_reads_scenario_folders(grid):
+    for scen, shift in (("ssp245", 5), ("ssp585", 15)):
+        (grid / scen).mkdir()
+        for year in (2050, 2090):
+            _write(grid / scen / f"earth_1deg_{year}.csv", _earth_rows(swing_shift=shift))
+    assert es.scenarios(grid) == ["ssp245", "ssp585"]
+    assert es.yearly_files(grid, "ssp585") == [(2050, "ssp585/earth_1deg_2050.csv"), (2090, "ssp585/earth_1deg_2090.csv")]
+    out = es.run_preset_over_years("thermal_environment", data_dir=grid, calibrate=False, cache_file=None,
+                                   scenario="ssp585", include_baseline=True)
+    assert out["years"] == [es.BASELINE_YEAR, 2050, 2090] and out["scenario"] == "ssp585"

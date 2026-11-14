@@ -16,9 +16,9 @@
     "mars": {
       "lat_step": 1.0,
       "lon_step": 1.0,
-      "lat0": -61.5,
+      "lat0": -89.5,
       "lon0": -179.5,
-      "n_lat": 152,
+      "n_lat": 180,
       "n_lon": 360,
       "decimals": 1,
       "cell_km": 59.2
@@ -27,13 +27,31 @@
   },
   "features": [
     {
-      "id": "regional_relief_m",
-      "label": "Regional relief",
+      "id": "slope_deg",
+      "label": "Slope",
+      "category": "terrain",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "deg",
+      "tau": 5
+    },
+    {
+      "id": "roughness_m",
+      "label": "Roughness",
       "category": "terrain",
       "kind": "scalar",
       "comparator": "clipped_linear_v1",
       "unit": "m",
-      "tau": 3000
+      "tau": 1500
+    },
+    {
+      "id": "relief_m",
+      "label": "Relief inside the cell",
+      "category": "terrain",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "m",
+      "tau": 4000
     },
     {
       "id": "surface_temp_swing_K",
@@ -54,6 +72,15 @@
       "tau": 100
     },
     {
+      "id": "air_temp_swing_K",
+      "label": "Day–night air temperature swing",
+      "category": "thermal",
+      "kind": "scalar",
+      "comparator": "clipped_linear_v1",
+      "unit": "K",
+      "tau": 50
+    },
+    {
       "id": "ati_percentile",
       "label": "Thermal inertia (rank within planet)",
       "category": "thermophysical",
@@ -72,12 +99,37 @@
       "tau": 0.2
     },
     {
+      "id": "mineral_groups",
+      "label": "Mineral groups (proxy)",
+      "category": "mineralogy",
+      "kind": "set",
+      "comparator": "jaccard_v1",
+      "unit": "set",
+      "categories": [
+        "basaltic",
+        "felsic",
+        "clays_hydrated",
+        "sulfates_salts",
+        "carbonates",
+        "iron_oxides"
+      ]
+    },
+    {
       "id": "rock_group",
       "label": "Rock type",
       "category": "geology",
       "kind": "categorical",
       "comparator": "categorical_match_v1",
-      "unit": "class"
+      "unit": "class",
+      "categories": [
+        "volcanic",
+        "ancient_crust",
+        "sedimentary",
+        "evaporite_salt",
+        "ice",
+        "impact",
+        "water"
+      ]
     },
     {
       "id": "inside_impact_structure",
@@ -114,6 +166,10 @@
       "label": "Albedo"
     },
     {
+      "id": "mineralogy",
+      "label": "Mineral groups"
+    },
+    {
       "id": "geology",
       "label": "Rock type"
     },
@@ -137,12 +193,19 @@
         "lon": 137.8
       },
       "values": {
-        "regional_relief_m": 2916.8438,
+        "slope_deg": 3.1618,
+        "roughness_m": 962.708,
+        "relief_m": 3978.7849,
         "surface_temp_swing_K": 85.3348,
         "surface_temp_min_K": 184.1475,
-        "ati_percentile": 0.26825434540237236,
+        "air_temp_swing_K": 43.9538,
+        "ati_percentile": 0.2264969135802469,
         "albedo": 0.2181,
-        "rock_group": "impact",
+        "mineral_groups": [
+          "basaltic",
+          "clays_hydrated"
+        ],
+        "rock_group": "sedimentary",
         "inside_impact_structure": true,
         "ground_ice_flag": false
       }
@@ -157,11 +220,18 @@
         "lon": 77.58
       },
       "values": {
-        "regional_relief_m": 2177.5703,
+        "slope_deg": 1.0819,
+        "roughness_m": 252.8946,
+        "relief_m": 833.7354,
         "surface_temp_swing_K": 77.0714,
         "surface_temp_min_K": 191.1525,
-        "ati_percentile": 0.4777840732549851,
+        "air_temp_swing_K": 37.3403,
+        "ati_percentile": 0.4034104938271605,
         "albedo": 0.1746,
+        "mineral_groups": [
+          "basaltic",
+          "clays_hydrated"
+        ],
         "rock_group": "sedimentary",
         "inside_impact_structure": true,
         "ground_ice_flag": false
@@ -177,11 +247,18 @@
         "lon": -167.5
       },
       "values": {
-        "regional_relief_m": 35.96090000000004,
+        "slope_deg": 0.0344,
+        "roughness_m": 5.6957,
+        "relief_m": 23.0967,
         "surface_temp_swing_K": 62.0172,
         "surface_temp_min_K": 155.3111,
-        "ati_percentile": 0.5643814084404072,
+        "air_temp_swing_K": 32.114,
+        "ati_percentile": 0.4765277777777778,
         "albedo": 0.2485,
+        "mineral_groups": [
+          "basaltic",
+          "clays_hydrated"
+        ],
         "rock_group": "volcanic",
         "inside_impact_structure": false,
         "ground_ice_flag": false
@@ -196,29 +273,34 @@
       "why": "Terrain decides mobility; surface material (thermal inertia, albedo) separates dunes, gravel and bedrock.",
       "target": "gale",
       "category_weights": {
-        "terrain": 0.3313105292418278,
-        "thermal": 0.08967159430225008,
-        "thermophysical": 0.13022666156522353,
-        "optical": 0.1897742891996808,
-        "geology": 0.08230210372212803,
-        "craters": 0.0888161506194161,
-        "water": 0.08789867134947377
+        "terrain": 0.39806135444181295,
+        "thermal": 0.09841079927947585,
+        "thermophysical": 0.09969961335506432,
+        "optical": 0.20323319370127943,
+        "mineralogy": 0.02411345382202394,
+        "geology": 0.014757150958241538,
+        "craters": 0.07702005964172845,
+        "water": 0.08470437480037361
       },
       "feature_weights": {
-        "regional_relief_m": 0.3313105292418278,
-        "surface_temp_swing_K": 0.06294365365741073,
-        "surface_temp_min_K": 0.02672794064483935,
-        "ati_percentile": 0.13022666156522353,
-        "albedo": 0.1897742891996808,
-        "rock_group": 0.08230210372212803,
-        "inside_impact_structure": 0.0888161506194161,
-        "ground_ice_flag": 0.08789867134947377
+        "slope_deg": 0.14344639788277846,
+        "roughness_m": 0.12769712979552406,
+        "relief_m": 0.12691782676351043,
+        "surface_temp_swing_K": 0.05223956419349221,
+        "surface_temp_min_K": 0.02357639474670992,
+        "air_temp_swing_K": 0.02259484033927372,
+        "ati_percentile": 0.09969961335506432,
+        "albedo": 0.20323319370127943,
+        "mineral_groups": 0.02411345382202394,
+        "rock_group": 0.014757150958241538,
+        "inside_impact_structure": 0.07702005964172845,
+        "ground_ice_flag": 0.08470437480037361
       },
       "requirements": [],
       "required_features": [],
       "weights_used": "calibrated",
       "verdict": "accepted",
-      "verdict_reason": "hidden analogs: mean rank 172 -> 160 (+7.0%), 2/3 improved; threshold 5% and half improved",
+      "verdict_reason": "hidden analogs: mean rank 772 -> 634 (+17.9%), 2/2 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -250,6 +332,7 @@
       "category_weights": {
         "craters": 0.5,
         "geology": 2.0,
+        "mineralogy": 1.0,
         "optical": 1.0,
         "terrain": 1.0,
         "thermal": 0.5,
@@ -257,11 +340,15 @@
         "water": 0.5
       },
       "feature_weights": {
-        "regional_relief_m": 1.0,
+        "slope_deg": 1.0,
+        "roughness_m": 1.0,
+        "relief_m": 1.0,
         "surface_temp_swing_K": 2.0,
         "surface_temp_min_K": 1.0,
+        "air_temp_swing_K": 1.0,
         "ati_percentile": 1.0,
         "albedo": 1.0,
+        "mineral_groups": 1.0,
         "rock_group": 1.0,
         "inside_impact_structure": 1.0,
         "ground_ice_flag": 1.0
@@ -270,7 +357,7 @@
       "required_features": [],
       "weights_used": "science (start)",
       "verdict": "rejected",
-      "verdict_reason": "hidden analogs: mean rank 1745 -> 1734 (+0.6%), 1/2 improved; threshold 5% and half improved",
+      "verdict_reason": "hidden analogs: mean rank 1988 -> 1939 (+2.5%), 2/2 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -296,29 +383,34 @@
       "why": "The day-night swing is the clearest Mars-like signal (Science P2); cold minima matter for survival heating.",
       "target": "gale",
       "category_weights": {
-        "craters": 0.0,
+        "terrain": 0.06765594284119299,
+        "thermal": 0.5582265946456595,
+        "thermophysical": 0.09005589238853672,
+        "optical": 0.20523879949569054,
+        "mineralogy": 0.0,
         "geology": 0.0,
-        "optical": 1.0,
-        "terrain": 0.25,
-        "thermal": 3.0,
-        "thermophysical": 1.0,
-        "water": 0.5
+        "craters": 0.0,
+        "water": 0.07882277062892024
       },
       "feature_weights": {
-        "regional_relief_m": 1.0,
-        "surface_temp_swing_K": 2.0,
-        "surface_temp_min_K": 1.0,
-        "ati_percentile": 1.0,
-        "albedo": 1.0,
-        "rock_group": 1.0,
-        "inside_impact_structure": 1.0,
-        "ground_ice_flag": 1.0
+        "slope_deg": 0.020765743142899726,
+        "roughness_m": 0.021197545149602648,
+        "relief_m": 0.025692654548690613,
+        "surface_temp_swing_K": 0.3076911326707499,
+        "surface_temp_min_K": 0.1261578629863216,
+        "air_temp_swing_K": 0.12437759898858808,
+        "ati_percentile": 0.09005589238853672,
+        "albedo": 0.20523879949569054,
+        "mineral_groups": 0.0,
+        "rock_group": 0.0,
+        "inside_impact_structure": 0.0,
+        "ground_ice_flag": 0.07882277062892024
       },
       "requirements": [],
       "required_features": [],
-      "weights_used": "science (start)",
-      "verdict": "rejected",
-      "verdict_reason": "hidden analogs: mean rank 943 -> 998 (-5.9%), 2/3 improved; threshold 5% and half improved",
+      "weights_used": "calibrated",
+      "verdict": "accepted",
+      "verdict_reason": "hidden analogs: mean rank 148 -> 56 (+62.4%), 2/2 improved; threshold 5% and half improved",
       "known_analogs": [
         {
           "name": "Atacama",
@@ -348,23 +440,28 @@
       "why": "Ice is a hard requirement for the Earth site. Similarity then favours cold, flat plains.",
       "target": "arcadia",
       "category_weights": {
-        "craters": 0.0,
+        "craters": 0,
         "geology": 0.5,
+        "mineralogy": 0,
         "optical": 0.5,
-        "terrain": 1.0,
-        "thermal": 2.0,
+        "terrain": 1,
+        "thermal": 2,
         "thermophysical": 0.5,
-        "water": 0.0
+        "water": 0
       },
       "feature_weights": {
-        "regional_relief_m": 1.0,
-        "surface_temp_swing_K": 2.0,
-        "surface_temp_min_K": 1.0,
-        "ati_percentile": 1.0,
-        "albedo": 1.0,
-        "rock_group": 1.0,
-        "inside_impact_structure": 1.0,
-        "ground_ice_flag": 0.0
+        "slope_deg": 1,
+        "roughness_m": 1,
+        "relief_m": 1,
+        "surface_temp_swing_K": 2,
+        "surface_temp_min_K": 1,
+        "air_temp_swing_K": 1,
+        "ati_percentile": 1,
+        "albedo": 1,
+        "mineral_groups": 1,
+        "rock_group": 1,
+        "inside_impact_structure": 1,
+        "ground_ice_flag": 0
       },
       "requirements": [
         {
@@ -378,7 +475,7 @@
       ],
       "weights_used": "science (start)",
       "verdict": "not_validated",
-      "verdict_reason": "leave-one-out was not run (it needs at least 2 usable known analogs); keep the starting weights",
+      "verdict_reason": "none of the known analogs are among the candidate cells",
       "known_analogs": [
         {
           "name": "Devon Island (Haughton)",
@@ -401,25 +498,75 @@
     }
   ],
   "years": [
-    "now"
+    "now",
+    2030,
+    2050,
+    2070,
+    2090
   ],
+  "baseline_year": 1985,
+  "scenario": "ssp245",
+  "scenarios": [
+    {
+      "id": "ssp245",
+      "label": "SSP2-4.5 · middle of the road",
+      "years": [
+        2030,
+        2050,
+        2070,
+        2090
+      ],
+      "files": {
+        "2030": "earth_ssp245_2030.json.gz",
+        "2050": "earth_ssp245_2050.json.gz",
+        "2070": "earth_ssp245_2070.json.gz",
+        "2090": "earth_ssp245_2090.json.gz"
+      }
+    },
+    {
+      "id": "ssp585",
+      "label": "SSP5-8.5 · high emissions",
+      "years": [
+        2030,
+        2050,
+        2070,
+        2090
+      ],
+      "files": {
+        "2030": "earth_ssp585_2030.json.gz",
+        "2050": "earth_ssp585_2050.json.gz",
+        "2070": "earth_ssp585_2070.json.gz",
+        "2090": "earth_ssp585_2090.json.gz"
+      }
+    }
+  ],
+  "scenarios_available": [
+    "ssp245",
+    "ssp585"
+  ],
+  "future_note": "Future years: CMIP6 multi-model mean (WorldClim 2.1). Changed: air temperature incl. the day-night air swing, precipitation and aridity (dry-land filter). NDVI, ground temperature, terrain, rock type, craters and albedo stay as today (no projection). The app interpolates linearly between the projected years.",
   "year_columns": [
     "surface_temp_swing_K",
     "surface_temp_min_K",
+    "air_temp_swing_K",
     "ati_percentile",
     "ground_ice_flag",
     "dry_bare"
   ],
   "files": {
     "earth": {
-      "now": "earth.json"
+      "now": "earth.json.gz",
+      "2030": "earth_ssp245_2030.json.gz",
+      "2050": "earth_ssp245_2050.json.gz",
+      "2070": "earth_ssp245_2070.json.gz",
+      "2090": "earth_ssp245_2090.json.gz"
     },
-    "mars": "mars.json"
+    "mars": "mars.json.gz"
   },
-  "compression": "none",
-  "dry_bare_rule": "precipitation < 500 mm/yr, NDVI < 0.2 (or unknown), not ice or water (provisional, Science)",
+  "compression": "gzip",
+  "dry_bare_rule": "aridity index <= 0.2 (arid + hyper-arid, Science), not ice or water",
   "dry_land": {
-    "has_aridity": false,
+    "has_aridity": true,
     "max_aridity": 0.2,
     "hyper_arid_below": 0.05
   },

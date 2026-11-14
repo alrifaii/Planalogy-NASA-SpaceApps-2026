@@ -56,6 +56,8 @@ def _earth_rows_50km(swing_shift: float = 0.0):
             "rock_group": ["sedimentary", "volcanic", "ancient_crust"][k % 3],
             "crater_count": 1 if k % 7 == 0 else 0, "ground_ice_flag": 1 if k % 4 == 0 else 0,
             "precipitation_mm_yr": 900 if k == 5 else 100, "ndvi": 0.1,
+            "slope_deg": 0.2 + 0.05 * k, "roughness_m": 40 + 5 * k, "relief_m": 200 + 20 * (k % 7),
+            "air_temp_swing_K": 6 + 0.3 * k, "mineral_groups": ["basaltic", "felsic|clays_hydrated", "carbonates"][k % 3],
         })
     return rows
 
@@ -69,6 +71,8 @@ def _mars_rows_50km():
                 "surface_temp_swing_K": 80, "surface_temp_min_K": 185, "apparent_thermal_inertia": 0.01 + 0.001 * k,
                 "albedo": 0.2, "rock_group": "sedimentary", "crater_count": 5, "ground_ice_flag": 0,
                 "precipitation_mm_yr": "", "ndvi": "",
+                "slope_deg": 3.2, "roughness_m": 900 + 10 * k, "relief_m": 3900, "air_temp_swing_K": 44,
+                "mineral_groups": "basaltic|clays_hydrated",
             })
     return rows
 
@@ -165,8 +169,8 @@ def test_run_preset_on_a_50km_grid(grid50):
     assert (out["target"]["lat"], out["target"]["lon"]) == gale and out["target"]["point"] == {"lat": -5.4, "lon": 137.8}
     assert out["profile_used"]["target_id"] == d["mars_spec"].cell_id(*gale) == "mars_-05.58_+137.94"
     assert out["grid"]["spatial_support"] == "grid_50km_v1" and out["heatmap"]["cell_size_deg"] == 0.45
-    # 49 cells, one wet (filtered out); the 4 corners have under 5 cells for the relief, so they are partial
-    assert out["counts"]["ranked"] == len(out["heatmap"]["rows"]) == 44 and out["counts"]["partial"] == 4
+    # 49 cells, one wet (filtered out); terrain comes from the cells' own slope/roughness/relief columns
+    assert out["counts"]["ranked"] == len(out["heatmap"]["rows"]) == 48 and out["counts"]["partial"] == 0
     assert any("50 km" in x for x in out["declared_limitations"])
 
 

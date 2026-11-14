@@ -13,12 +13,15 @@ Any other regular grid works the same way: put one earth_<name>.csv and one
 mars_<name>.csv in a folder (e.g. data/grid_50km/earth_50km.csv with 0.45 deg
 cells and mars_50km.csv with 0.84 deg cells) and pass --data <folder>. Cell
 size is read from the files (backend/grid_data.py).
-Yearly files for the slider: earth_<name>_<year>.csv next to earth_<name>.csv.
+Yearly files for the slider: data/grid_1deg/<scenario>/earth_<name>_<year>.csv
+(ssp245 = middle of the road, ssp585 = high emissions; CMIP6 projections from
+WorldClim 2.1, built by the Data team's prepare_future.py). Files directly in
+data/grid_1deg/ (earth_<name>_<year>.csv) are used when no scenario folder exists.
 
 Command line:
     python -m backend.engine_service                  # all presets
     python -m backend.engine_service rover_navigation --top 20
-    python -m backend.engine_service --data <folder> --years
+    python -m backend.engine_service --data <folder> --years [--scenario ssp585]
 Writes data/results/<preset>.json (and <preset>_years.json).
 """
 
@@ -41,6 +44,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 GRID_DIR = PROJECT_ROOT / "data" / "grid_1deg"
 PROFILE_CACHE = PROJECT_ROOT / "data" / "preset_profiles.json"
 RESULTS_DIR = PROJECT_ROOT / "data" / "results"
+DEFAULT_SCENARIO = "ssp245"
+BASELINE_YEAR = 1985  # today's Earth file: WorldClim climate 1970-2000 (middle year)
 
 
 class DataNotFound(RuntimeError):
@@ -91,26 +96,39 @@ def load_grid(data_dir: str, earth_file: str | None = None) -> dict[str, Any]:
     """
     path = Path(data_dir)
     earth, mars = grid_files(path)
-    years = yearly_files(path)
+    scenario = earth_file.split("/")[0] if earth_file and "/" in earth_file else DEFAULT_SCENARIO
+    years = yearly_files(path, scenario)
     reference = years[0][1] if years else None
     if earth_file is None or earth_file == earth:
         return g.build(path, earth, mars, reference_file=reference)
     return g.build(path, earth_file, mars, base_file=earth, reference_file=reference)
 
 
-def yearly_files(data_dir: Path) -> list[tuple[int, str]]:
-    """(year, file) for earth_<name>_<year>.csv files next to the base Earth file."""
+def yearly_files(data_dir: Path, scenario: str | None = DEFAULT_SCENARIO) -> list[tuple[int, str]]:
+    """(year, file name relative to data_dir) of the yearly Earth files of a scenario.
+
+    Yearly files are earth_<name>_<year>.csv next to the base earth_<name>.csv;
+    looks in data_dir/<scenario>/ first and falls back to data_dir/ itself.
+    """
     try:
         earth, _ = grid_files(data_dir)
     except DataNotFound:
         return []
     stem = earth[: -len(".csv")]
+    folder = data_dir / scenario if scenario and (data_dir / scenario).is_dir() else data_dir
+    prefix = f"{scenario}/" if folder != data_dir else ""
     found = []
-    for p in data_dir.glob(f"{stem}_*.csv"):
+    for p in folder.glob(f"{stem}_*.csv"):
         m = re.fullmatch(re.escape(stem) + r"_(\d{4})\.csv", p.name)
         if m:
-            found.append((int(m.group(1)), p.name))
+            found.append((int(m.group(1)), prefix + p.name))
     return sorted(found)
+
+
+def scenarios(data_dir: Path) -> list[str]:
+    """Scenario folders that hold yearly Earth files (e.g. ['ssp245', 'ssp585'])."""
+    return sorted(d.name for d in data_dir.iterdir()
+                  if d.is_dir() and any(re.fullmatch(r"earth_.+_\d{4}\.csv", p.name) for p in d.glob("earth_*.csv")))
 
 
 # --------------------------------------------------------------------------- presets
@@ -271,9 +289,16 @@ def run_preset_over_years(
     top_k: int = 20,
     calibrate: bool = True,
     cache_file: Path | None = PROFILE_CACHE,
+    scenario: str | None = DEFAULT_SCENARIO,
+    include_baseline: bool = False,
 ) -> dict[str, Any]:
-    """Year slider: same preset and profile against each yearly Earth file."""
-    years = yearly_files(data_dir)
+    """Year slider: same preset and profile against each yearly Earth file.
+
+    include_baseline adds today's Earth file as BASELINE_YEAR, so changes are shown against today.
+    """
+    years = yearly_files(data_dir, scenario)
+    if include_baseline and years:
+        years = [(BASELINE_YEAR, "earth_1deg.csv")] + years
     if len(years) < 2:
         return {"preset": preset_id, "years": [y for y, _ in years],
                 "message": "Put at least two earth_<grid>_<year>.csv files in the data folder to use the year slider."}
@@ -286,6 +311,7 @@ def run_preset_over_years(
     tl = rank_over_years(target, sites_by_year, profile, g.feature_definitions(), watch=watch, top_k=top_k)
     out = json.loads(tl.to_json())
     out["preset"] = preset_id
+    out["scenario"] = scenario if (data_dir / str(scenario)).is_dir() else None
     out["calibration"] = info
     return out
 
@@ -312,6 +338,11 @@ def main(argv: list[str]) -> None:
         top_n = int(args[i + 1])
         del args[i:i + 2]
     with_years = "--years" in args
+    scenario = DEFAULT_SCENARIO
+    if "--scenario" in args:
+        i = args.index("--scenario")
+        scenario = args[i + 1]
+        del args[i:i + 2]
     no_cal = "--no-calibration" in args
     ids = [a for a in args if not a.startswith("--")] or [p["id"] for p in PRESETS]
 
@@ -323,8 +354,9 @@ def main(argv: list[str]) -> None:
         print(f"{pid}: {payload['counts']['ranked']} ranked, weights {payload['calibration']['weights_used']}, "
               f"#1 {best['lat']:+.1f},{best['lon']:+.1f} score {best['score_0_100']} ({time.time() - t0:.0f}s) -> {path.name}")
         if with_years:
-            yp = export(run_preset_over_years(pid, data_dir=data_dir, calibrate=not no_cal),
-                        RESULTS_DIR / f"{pid}_years.json")
+            yp = export(run_preset_over_years(pid, data_dir=data_dir, calibrate=not no_cal, scenario=scenario,
+                                              include_baseline=True),
+                        RESULTS_DIR / f"{pid}_years_{scenario}.json")
             print(f"  years -> {yp.name}")
 
 

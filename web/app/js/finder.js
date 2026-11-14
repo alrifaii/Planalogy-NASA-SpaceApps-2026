@@ -49,7 +49,7 @@ TT.pages.finder = function(root){
   const st = {m:null, mode: TT.lsGet('planalogy.mode', 'simple') === 'advanced' ? 'advanced' : 'simple', scenario:null,
               target:'gale', custom:null, preset:null, lastPreset:null, year:'now', dry:true, hyper:false, cw:{}, fw:Object.assign({}, DEFAULT_FW),
               req:[], reqF:[], res:null, sims:null, sel:null, view:'earth', ai:null, busy:false, picking:false, focusKey:null};
-  let g3 = null, gm = null, dead = false, ctrl = null, playT = null;
+  let g3 = null, gm = null, dead = false, ctrl = null, playT = null, swapT = 0;
   const simCache = new Map();  // a few recent (target, scenario, year) similarity tables
   const mainGlobe = () => (st.view === 'mars' && gm) ? gm : g3;
 
@@ -283,7 +283,12 @@ TT.pages.finder = function(root){
     if (!g3 || !gm){ if (v === 'mars'){ TT.toast('3D globe unavailable: target is ' + targetName() + '.'); st.view = 'earth'; } return; }
     const marsMain = v === 'mars', t = target();
     // swap the two stages (CSS animates size and position) while each camera eases to its new distance
-    wrapE.className = 'f-globe ' + (marsMain ? 'mini' : 'main'); wrapM.className = 'f-globe ' + (marsMain ? 'main' : 'mini');
+    const grow = marsMain ? wrapM : wrapE, shrink = marsMain ? wrapE : wrapM;
+    if (!grow.classList.contains('main')){
+      grow.className = 'f-globe main grow'; shrink.className = 'f-globe mini enter'; ex.classList.add('swapping');
+      requestAnimationFrame(() => requestAnimationFrame(() => shrink.classList.remove('enter')));
+      clearTimeout(swapT); swapT = setTimeout(() => { grow.classList.remove('grow'); ex.classList.remove('swapping'); }, 680);
+    }
     ex.classList.toggle('mars-main', marsMain);
     gm.focus(t.lat, t.lon, {dist: marsMain ? 2.3 : 3.1, dur: 900});
     if (marsMain) g3.focus(g3.view.lat, g3.view.lon, {dist: 3.1, dur: 900});

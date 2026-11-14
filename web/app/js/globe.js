@@ -156,6 +156,9 @@ TT.createGlobe = function(canvas, o){
       camera.aspect = W / H; camera.updateProjectionMatrix();
       const sc = o.markerPx / H * 2 * Math.tan(camera.fov * D2R / 2);
       if (cur) cur.userData.markers.children.forEach(s => { const k = s.userData.base ? 1.7 : 1; s.scale.set(sc * k, sc * k, 1); if (s.userData.base) s.userData.base = sc * 1.7; });
+      // resizing clears the canvas and resize callbacks run after this frame's render: draw again now,
+      // or an animated resize (the Finder's planet swap) shows an empty stage until it ends
+      if (alive && cur){ camera.position.copy(ll2v(view.lat, view.lon, view.dist)); camera.up.set(0, 1, 0); camera.lookAt(0, 0, 0); renderer.render(scene, camera); }
     },
     dispose(){ alive = false; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); canvas.removeEventListener('wheel', onWheel); },
     pickAt(x, y, r){

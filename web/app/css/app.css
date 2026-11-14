@@ -380,7 +380,12 @@ details summary{color:var(--accent2)}
 .f-switch input{width:18px;height:18px;accent-color:var(--accent)}
 
 /* Analog Finder: dual view (main globe + the other planet in a corner; they swap with an animation) */
-.finder .f-globe{position:absolute;overflow:hidden;transition:left .65s cubic-bezier(.2,.8,.2,1),bottom .65s cubic-bezier(.2,.8,.2,1),width .65s cubic-bezier(.2,.8,.2,1),height .65s cubic-bezier(.2,.8,.2,1),border-radius .65s ease,box-shadow .65s ease}
+.finder .f-globe{position:absolute;overflow:hidden;--sw:left .65s cubic-bezier(.2,.8,.2,1),bottom .65s cubic-bezier(.2,.8,.2,1),width .65s cubic-bezier(.2,.8,.2,1),height .65s cubic-bezier(.2,.8,.2,1),border-radius .65s ease,box-shadow .65s ease;transition:var(--sw),opacity .3s ease .6s}
+/* swap: the new main planet grows from the corner on top; the old one shrinks beneath it, then fades in at the corner */
+.finder .f-globe.main.grow{z-index:13}
+.finder .f-globe.mini.enter{opacity:0;transition:var(--sw),opacity 0s}
+.finder .f-mini-hit{transition:border-color .2s,opacity .25s ease}
+.finder.swapping .f-mini-hit{opacity:0;pointer-events:none}
 .finder .f-globe.main{left:0;bottom:0;width:100%;height:100%;border-radius:0;z-index:1}
 .finder .f-globe.mini{left:334px;bottom:84px;width:220px;height:220px;border-radius:18px;z-index:11;background:radial-gradient(circle at 50% 45%,#15213a 0%,#080D1B 75%);box-shadow:0 12px 34px rgba(2,6,16,.55)}
 .finder .f-mini-hit{position:absolute;left:334px;bottom:84px;width:220px;height:220px;z-index:12;padding:0 0 9px;border:1px solid var(--line2);border-radius:18px;background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;transition:border-color .2s}

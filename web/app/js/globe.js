@@ -43,7 +43,11 @@ function makePlanet(body, renderer, onLoad){
   const cfg = TEX[body], g = new THREE.Group(); g.name = body;
   const mat = new THREE.MeshPhongMaterial({color: 0xffffff, shininess: body === 'earth' ? 14 : 2, specular: new THREE.Color(body === 'earth' ? 0x1c2736 : 0x050505)});
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 192, 96), mat); g.add(mesh);
-  TT.loadImage(cfg.map).then(img => { mat.map = mkTex(img, true, renderer); mat.needsUpdate = true; onLoad && onLoad(body, 'map'); }).catch(e => onLoad && onLoad(body, 'error', e));
+  /* an optional 8k texture (tex/get_textures.py) replaces the built-in one when the graphics card can hold it */
+  const hi = (window.PLANALOGY_HI || {})[body], big = renderer && renderer.capabilities.maxTextureSize >= 8192;
+  const setMap = img => { mat.map = mkTex(img, true, renderer); mat.needsUpdate = true; onLoad && onLoad(body, 'map'); };
+  TT.loadImage(cfg.map).then(img => { if (!mat.map) setMap(img); }).catch(e => onLoad && onLoad(body, 'error', e));
+  if (hi && big) TT.loadImage(hi).then(setMap).catch(() => {});
   if (cfg.bump) TT.loadImage(cfg.bump).then(img => { mat.bumpMap = mkTex(img, false, renderer); mat.bumpScale = cfg.bumpScale; mat.needsUpdate = true; }).catch(() => {});
   if (cfg.spec) TT.loadImage(cfg.spec).then(img => { mat.specularMap = mkTex(img, false, renderer); mat.needsUpdate = true; }).catch(() => {});
   const glow = new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({

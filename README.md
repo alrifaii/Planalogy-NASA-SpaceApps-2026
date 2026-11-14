@@ -57,12 +57,22 @@ Science P1-P10 recommendation (`run_config.py`, data contract section 9).
 
 ## Web app (Planalogy)
 
-`web/app/` is the static web app. It has the 3D globe and an **Analog
-Finder**. Pick a Mars target (a preset site or **any point on Mars**), then
-choose a mission preset or set weights, by hand or by describing the mission
-to Claude. Every Earth land cell is re-ranked in the browser; by default only
-dry, bare land counts, and a switch turns that off. A heat map, the top sites
-and site cards update instantly.
+`web/app/` is the static web app. It has two pages: the **Analog Finder** and
+**About** (project, data sources, team). The Finder is one screen with five
+steps: pick a target on Mars (a preset site or any point on the globe), switch
+to Earth, choose a mission, move through the years (today to 2090, SSP2-4.5 or
+SSP5-8.5), and switch the eight parameters on or off and set their weights.
+Every Earth land cell is re-ranked in the browser. Against today, cells that
+drop out of the candidates are outlined in red and cells that join in white.
+The Moon is a third body as a preview (planned base sites, no scoring yet).
+Sites with 1-km projections (`data/hires_sites/`) show an "Inside this cell"
+block in their site card.
+
+The earlier pages (Explore, Compare, Admin, detail pages) are still in
+`web/app/js/` but are no longer loaded by `index.html`.
+
+Optional sharper globes (8192 px, Solar System Scope, CC BY 4.0):
+`python web/app/tex/get_textures.py`.
 
 `backend/web_export.py` exports the raw feature values of every Earth land
 cell and every Mars cell. `web/app/js/scoring.js` applies the engine's
@@ -73,8 +83,7 @@ To refresh the data after new grid files, including yearly files for the
 year slider, run:
 
 ```bash
-python -m backend.web_export                     # years from data/grid_1deg/ssp245/
-python -m backend.web_export --scenario ssp585   # or the high-emission scenario
+python -m backend.web_export     # every scenario in data/grid_1deg/ and the 1-km site results
 ```
 
 The app is published as a Claude artifact. Any static host also works:

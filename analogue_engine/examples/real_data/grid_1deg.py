@@ -70,6 +70,56 @@ def feature_definitions() -> list[dict[str, Any]]:
     ]
 
 
+TAUS = {  # PROVISIONAL scales, shared by all mission presets
+    "regional_relief_m": (3000, "m"),
+    "surface_temp_swing_K": (100, "K"),
+    "surface_temp_min_K": (100, "K"),
+    "ati_percentile": (0.5, "1"),
+    "albedo": (0.2, "1"),
+}
+DIMENSION_OF = {
+    "regional_relief_m": "terrain", "surface_temp_swing_K": "thermal", "surface_temp_min_K": "thermal",
+    "ati_percentile": "thermophysical", "albedo": "optical", "rock_group": "geology",
+    "inside_impact_structure": "craters", "ground_ice_flag": "water",
+}
+COMMON_LIMITATIONS = [
+    "Pressure: every Earth site has roughly 80-150x Mars' air pressure (P5, not scored).",
+    "Sunlight and UV: no comparable data; Mars has no ozone layer (P5, not scored).",
+    "Dust: no Earth equivalent of the Martian dust layer (P6, not scored).",
+    "Gravity and radiation are not reproduced on Earth.",
+    "Resolution: 1-degree cells (about 110 km) are far coarser than rover-scale terrain.",
+]
+
+
+def make_profile(
+    profile_id: str,
+    target_id: str,
+    dimension_weights: dict[str, float],
+    feature_weights: dict[str, float],
+    *,
+    description: str,
+    constraints: list[dict] | None = None,
+    required: list[str] | None = None,
+    extra_limitations: list[str] | None = None,
+    version: str = "0.1.0",
+) -> dict[str, Any]:
+    """Build a profile over the grid features; scales come from TAUS."""
+    features = []
+    for fid, w in feature_weights.items():
+        item = {"feature_id": fid, "weight": w}
+        if fid in TAUS:
+            item["tau"], item["tau_unit"] = TAUS[fid]
+        features.append(item)
+    dims = {DIMENSION_OF[f] for f in feature_weights}
+    return {
+        "id": profile_id, "version": version, "target_id": target_id, "calibration_status": "provisional",
+        "description": description,
+        "dimension_weights": {d: dimension_weights.get(d, 0) for d in sorted(dims)},
+        "features": features, "required_features": required or [], "constraints": constraints or [],
+        "declared_limitations": COMMON_LIMITATIONS + (extra_limitations or []),
+    }
+
+
 def profile(target_id: str, version: str = "0.1.0") -> dict[str, Any]:
     """Science-informed starting profile. Weights and scales are PROVISIONAL."""
     return {
@@ -167,8 +217,9 @@ def cell_site(planet: str, grid: dict, key: tuple[float, float], ati_table: list
     }
 
 
-def build(data_dir: Path) -> dict[str, Any]:
-    earth, mars = load_grid(data_dir / "earth_1deg.csv"), load_grid(data_dir / "mars_1deg.csv")
+def build(data_dir: Path, earth_file: str = "earth_1deg.csv") -> dict[str, Any]:
+    """Load both grids. ``earth_file`` selects a yearly Earth file for the year slider."""
+    earth, mars = load_grid(data_dir / earth_file), load_grid(data_dir / "mars_1deg.csv")
     earth_ati, mars_ati = _percentile_table(earth, land_only=True), _percentile_table(mars, land_only=False)
     earth_sites = [cell_site("earth", earth, k, earth_ati) for k, r in earth.items() if passes_earth_filter(r)]
     return {"earth": earth, "mars": mars, "earth_ati": earth_ati, "mars_ati": mars_ati, "earth_sites": earth_sites}

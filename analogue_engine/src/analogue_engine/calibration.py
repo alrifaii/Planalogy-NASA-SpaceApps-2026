@@ -64,6 +64,10 @@ class CalibrationSettings:
     temperature: float = 0.05  # T, in score units (0-1)
     iterations: int = 400
     step: float = 0.05  # exponentiated-gradient step size
+    # Validation gate (leave-one-out): accept the calibrated weights only if the
+    # mean rank of hidden analogs improves by at least this fraction AND at
+    # least half of the hidden analogs improve.
+    min_loo_improvement: float = 0.05
 
 
 @dataclass(frozen=True)
@@ -100,6 +104,10 @@ class CalibrationResult:
     calibrated_profile: dict[str, Any]  # ready to pass to rank()
     settings: CalibrationSettings
     warnings: tuple[str, ...]
+    # Validation gate: accept learned weights only if hidden analogs improve.
+    verdict: str  # "accepted" | "rejected" | "not_validated"
+    verdict_reason: str
+    recommended_profile: dict[str, Any]  # calibrated if accepted, otherwise the starting profile
     note: str = (
         "Weights tuned so that known analogs rank high, anchored to the starting weights. "
         "Unlabelled candidates are not assumed to be bad sites. Scales, requirements and data "
@@ -227,7 +235,8 @@ def calibrate_weights(
     top_new: int = 10,
 ) -> CalibrationResult:
     settings = settings or CalibrationSettings()
-    if not (settings.temperature > 0 and settings.step > 0 and settings.prior_strength >= 0 and settings.iterations >= 0):
+    if not (settings.temperature > 0 and settings.step > 0 and settings.prior_strength >= 0
+            and settings.iterations >= 0 and settings.min_loo_improvement >= 0):
         raise InvalidRequestError("invalid calibration settings", code="invalid_settings")
     target, profile = as_site(target), as_profile(profile)
     sites = [as_site(c) for c in candidates]
@@ -308,6 +317,22 @@ def calibrate_weights(
             out[dimension_of[fid]] = out.get(dimension_of[fid], 0.0) + wt
         return out
 
+    if not loo:
+        verdict = "not_validated"
+        reason = "leave-one-out was not run (it needs at least 2 usable known analogs); keep the starting weights"
+    else:
+        before = math.fsum(r.rank_with_start_weights for r in loo) / len(loo)
+        after = math.fsum(r.rank_with_calibrated_weights for r in loo) / len(loo)
+        improved = sum(1 for r in loo if r.rank_with_calibrated_weights < r.rank_with_start_weights)
+        gain = (before - after) / before if before > 0 else 0.0
+        ok = gain >= settings.min_loo_improvement and improved * 2 >= len(loo)
+        verdict = "accepted" if ok else "rejected"
+        reason = (
+            f"hidden analogs: mean rank {before:.0f} -> {after:.0f} ({100 * gain:+.1f}%), "
+            f"{improved}/{len(loo)} improved; threshold {100 * settings.min_loo_improvement:.0f}% and half improved"
+        )
+    recommended = profile_to_dict(calibrated_profile) if verdict == "accepted" else profile_to_dict(profile)
+
     return CalibrationResult(
         profile_id=profile.id,
         start_version=profile.version,
@@ -325,4 +350,7 @@ def calibrate_weights(
         calibrated_profile=profile_to_dict(calibrated_profile),
         settings=settings,
         warnings=tuple(warnings),
+        verdict=verdict,
+        verdict_reason=reason,
+        recommended_profile=recommended,
     )

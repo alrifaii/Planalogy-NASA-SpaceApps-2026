@@ -388,7 +388,38 @@ tl.biggest_gainers / tl.biggest_losers
   match the current ones. For example, climate models usually give the
   *air* temperature range, not the *ground* day–night swing.
 
-## 8. Integration notes for the recommender
+## 8. Mission presets (buttons in the app)
+
+`examples/real_data/run_presets.py <data_dir>` writes `output_presets.json`
+with one entry per preset:
+
+| Preset | Target | Main weight | Calibration verdict (current data) |
+|---|---|---|---|
+| `rover_navigation` | Gale (Curiosity) | terrain ×2 | accepted |
+| `sample_science` | Jezero (Perseverance) | geology ×2 | rejected → science weights |
+| `thermal_environment` | Gale | thermal ×3 | rejected → science weights |
+| `ice_prospecting` | Arcadia Planitia | thermal and terrain; ground ice is a hard requirement | not validated → science weights |
+
+Each entry has:
+* `target_cell` and `why`;
+* the start and calibrated category weights, the known-analog ranks and the
+  leave-one-out check;
+* `verdict`, `verdict_reason` and `weights_used`;
+* `profile_used`: the profile to pass to `rank()`;
+* `top_sites`: lat, lon, score and per-category scores;
+* `declared_limitations`;
+* `years`: the per-year trajectories, when yearly files exist.
+
+**Validation gate:** `calibrate_weights` returns `verdict` and
+`recommended_profile`. Learned weights are accepted only if hidden known
+analogs improve: mean leave-one-out rank at least 5 % better, and at least
+half of them improve. Otherwise the starting (Science) weights are
+recommended.
+
+Helicopter flight is deliberately not a preset: it depends on air density,
+which Earth does not reproduce.
+
+## 9. Integration notes for the recommender
 
 * Similarity is evidence, not operational suitability. Activity
   recommendations need requirements agreed with science, applied by the

@@ -145,6 +145,29 @@ def test_single_known_analog_skips_leave_one_out(parts):
     assert any("leave-one-out needs" in w for w in r.warnings)
 
 
+def test_validation_gate_accepts_when_hidden_analogs_improve(result):
+    assert result.verdict == "accepted"
+    assert result.recommended_profile == result.calibrated_profile
+    assert "hidden analogs" in result.verdict_reason
+
+
+def test_validation_gate_rejects_and_keeps_start_weights(parts):
+    target, cands, profile, defs, known = parts
+    r = calibrate_weights(target, cands, profile, defs, known,
+                          settings=CalibrationSettings(min_loo_improvement=1.0))  # impossible bar
+    assert r.verdict == "rejected"
+    assert r.recommended_profile["version"] == profile.version  # starting profile, not "-cal"
+    again = rank(target, cands, r.recommended_profile, defs)
+    assert again.effective_weights == pytest.approx(r.start_feature_weights, abs=1e-12)
+
+
+def test_validation_gate_not_validated_with_one_analog(parts):
+    target, cands, profile, defs, _ = parts
+    r = calibrate_weights(target, cands, profile, defs, ["synthetic_known_analog_1"])
+    assert r.verdict == "not_validated"
+    assert r.recommended_profile["version"] == profile.version
+
+
 def test_deterministic_and_strict_json(parts, result):
     target, cands, profile, defs, known = parts
     again = calibrate_weights(target, cands, profile, defs, known)

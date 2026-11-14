@@ -38,6 +38,13 @@ To run it on the Data team's 1° grid (the data is not in this repo):
 python examples/real_data/run_real_grid.py <data_dir> gale
 ```
 
+To run the four mission presets (rover, sample science, thermal, ice), with
+calibration, the validation gate and yearly files if present:
+
+```bash
+python examples/real_data/run_presets.py <data_dir>
+```
+
 See [docs/math-model.md](docs/math-model.md) for the equations and
 [docs/data-contract.md](docs/data-contract.md) for input/output and errors.
 
@@ -105,7 +112,7 @@ src/analogue_engine/
   adapters.py       bridge to the backend wide table and its 0-100 similarity_scores
   calibration.py    weight calibration on known analogs (+ leave-one-out)
   timeline.py       rankings over years (gaining / losing analogs)
-tests/              171 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, calibration, timeline, review regressions)
+tests/              174 tests (fixture, validation, properties, sensitivity, comparators, CSV, dimensions, backend bridge, calibration, timeline, review regressions)
 examples/           synthetic fixture, runner script, example outputs
 docs/               math model, data contract, Spanish guide
 ```

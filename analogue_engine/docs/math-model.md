@@ -143,6 +143,24 @@ rank goes from the top 14.9 % to the top 4.1 %. Leave-one-out improves the
 hidden ones that started far down (#54→#28, #33→#14, #20→#4); those already
 at the top stay or drop one place.
 
+## 4c-bis. Validation gate and mission presets
+
+`calibrate_weights` only recommends the calibrated profile when the
+leave-one-out mean rank of the hidden known analogs improves by at least
+`min_loo_improvement` (5 %) and at least half of them improve. Otherwise it
+recommends the starting weights (`verdict`: accepted / rejected /
+not_validated).
+
+On the 1° grid, four presets give:
+* **rover / Gale:** accepted, +7.0 %, 2/3 improved;
+* **sample science / Jezero:** rejected, +0.6 %;
+* **thermal / Gale:** rejected, −5.9 %;
+* **ice / Arcadia:** not validated, only one usable analog.
+
+The rejections are informative. Hot-desert and polar analogs pull a thermal
+profile in opposite directions; the 1° cells mix salt flats with
+surrounding crust; and southern-hemisphere ground-ice data is missing.
+
 ## 4d. Rankings over time (`timeline.py`)
 
 `rank_over_years` ranks one fixed target with one fixed profile against each

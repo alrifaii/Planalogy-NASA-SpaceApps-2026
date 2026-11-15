@@ -410,7 +410,8 @@ TT.pages.finder = function(root){
     ui.areaBox.append(
       h('div', {class:'kicker k-' + a.body}, 'Your area on ' + NAME[a.body]),
       h('h1', null, a.label || fmtArea(a)),
-      h('p', {class:'lede'}, (a.label ? fmtArea(a) + '. ' : '') + AREA_KM + ' km around the point, ' + a.n + ' cells averaged. ' + other + ' shows where it is most alike. Click anywhere on either globe to pick a new area.'));
+      h('p', {class:'lede'}, (a.label ? fmtArea(a) + '. ' : '') + AREA_KM + ' km around the point, ' + a.n + ' cells averaged. ' + other + ' shows where it is most alike. Click anywhere on either globe to pick a new area.'),
+      a.body === 'earth' ? hiresBlock(a, 1) : null);
   }
   function drawPresets(){
     if (!ui.presetBox) return;
@@ -498,8 +499,8 @@ TT.pages.finder = function(root){
       target() === 'earth' ? hiresBlock(it) : null]);
   }
   function valueOf(it, fid){ const cols = it.cols || (st.lastCols && st.lastCols[target()]); return cols && cols[fid] !== undefined ? it.row[cols[fid]] : null; }
-  function hiresBlock(it){
-    const site = st.hires && st.hires.sites.find(s => Math.abs(s.lat - it.lat) <= .5 && Math.abs(s.lon - it.lon) <= .5);
+  function hiresBlock(it, tol){
+    const t = tol || .5, site = st.hires && st.hires.sites.find(s => Math.abs(s.lat - it.lat) <= t && Math.abs(s.lon - it.lon) <= t);
     if (!site || !site.today) return null;
     const ss = Object.keys(site.scenarios || {}); if (!ss.length) return null;
     const sc = ss.includes(st.scen) ? st.scen : ss[0], yrs = Object.keys(site.scenarios[sc]).sort();
@@ -512,7 +513,9 @@ TT.pages.finder = function(root){
       h('p', {class:'meta'}, 'Today and projected, ' + sspName(sc) + (nm ? ', mean of ' + nm + ' model' + (nm > 1 ? 's' : '') : '') + '.'),
       h('table', null, h('thead', null, h('tr', null, h('th', null, ''), cols.map(([y]) => h('th', null, y)))),
         h('tbody', null, row('Air temperature', 'tmean_C', 1, ' °C'), row('Day–night swing', 'air_temp_swing_K', 1, ' K'), row('Rain per year', 'precip_mm_yr', 0, ' mm'),
-          row('Hyper-arid share', 'share_hyperarid_pct', 0, ' %'), row('Dry enough for Mars', 'share_mars_dry_pct', 0, ' %'))),
+          /* polar deserts: the aridity index (rain / evaporation) fails in the cold, so they get the cold-desert share */
+          site.today.tmean_C < 0 ? row('Cold-desert share', 'share_cold_desert_pct', 0, ' %') : row('Hyper-arid share', 'share_hyperarid_pct', 0, ' %'),
+          row('Dry enough for Mars', 'share_mars_dry_pct', 0, ' %'))),
       map ? h('a', {href: DATA + 'hires/' + map, target:'_blank', rel:'noopener'}, h('img', {src: DATA + 'hires/' + map, alt:'1-km maps of temperature and aridity, today and projected', loading:'lazy'})) : null);
   }
 
@@ -591,7 +594,7 @@ TT.pages.finder = function(root){
     st.lastCols = {earth: cols(e0), mars: cols(m0)};
     drawPresets(); drawSliders(); drawBand();
     await pickArea('mars', START.mars.lat, START.mars.lon, START.mars.label);
-    if (m.files.hires) load(m.files.hires).then(d => { st.hires = d; if (st.sel) drawResults(); }).catch(() => {});
+    if (m.files.hires) load(m.files.hires).then(d => { st.hires = d; drawArea(); if (st.sel) drawResults(); }).catch(() => {});
   }).catch(e => { console.error(e); TT.clear(scroll); scroll.append(h('h1', null, 'No data'), h('p', {class:'lede'}, 'The analog data could not be loaded. Start the app with the start file.')); });
 
   return { destroy(){ dead = true; TT.finder = null; if (linkRaf) cancelAnimationFrame(linkRaf); gL && gL.dispose(); gE && gE.dispose(); } };

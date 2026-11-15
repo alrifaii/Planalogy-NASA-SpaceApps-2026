@@ -43,6 +43,7 @@ hyper-arid land (< 0.05); without it the files are exactly as before.
 
 from __future__ import annotations
 
+import gc
 import gzip
 import shutil
 import json
@@ -200,20 +201,28 @@ def export(
     keep = [full_cols.index(c) for c in year_cols]
     payloads["earth"] = {"columns": full_cols, "rows": _earth_rows(base, aridity)}
     scen_files: dict[str | None, dict[str, str]] = {}
+    early: dict[str, bytes] = {}
     for scen in scen_ids:
         scen_files[scen] = {}
         for year, fname in es.yearly_files(data_dir, scen):
             name = f"earth_{scen}_{year}" if scen else f"earth_{year}"
             rows = _earth_rows(es.load_grid(str(data_dir), fname), aridity)
-            payloads[name] = {"columns": year_cols, "base": "earth.json", "rows": [[r[i] for i in keep] for r in rows]}
+            payloads[name] = {"columns": year_cols, "base": "earth.json.gz" if compress else "earth.json",
+                              "rows": [[r[i] for i in keep] for r in rows]}
             scen_files[scen][str(year)] = name
+            del rows
+            if compress:  # fine grids: encode now and drop the rows, so memory stays flat
+                early[name] = _encode(payloads[name])
+                payloads[name] = {"base": payloads[name]["base"]}
+            es.load_grid.cache_clear()
+            gc.collect()
 
-    blobs = {name: _encode(pl) for name, pl in payloads.items()}
+    blobs = {name: early.get(name) or _encode(pl) for name, pl in payloads.items()}
     use_gzip = max(len(b) for b in blobs.values()) > FILE_BUDGET if compress is None else compress
     ext = ".json.gz" if use_gzip else ".json"
     written = set()
     for name, payload in payloads.items():
-        if "base" in payload and use_gzip:  # yearly files name their (compressed) base file
+        if "base" in payload and use_gzip and name not in early:  # yearly files name their (compressed) base file
             payload["base"] = "earth" + ext
             blobs[name] = _encode(payload)
         path = out_dir / (name + ext)

@@ -612,3 +612,96 @@ button.chip[aria-pressed=true]{background:#fff;color:#000;border-color:#fff}
 .mv{font-size:10px;font-weight:600;color:var(--muted);margin-top:2px}
 .mv.up{color:#5cf0a0} .mv.down{color:#ff6b6b}
 .f-site{grid-template-columns:1.8em minmax(0,1fr) 2.6em}
+
+/* =====================================================================
+   v2: logo and About at the top left, two globes side by side
+   ===================================================================== */
+:root{--f-head:"ABC Areal","Montserrat",system-ui,sans-serif;--f-body:"ABC Areal","Montserrat",system-ui,sans-serif;--f-mono:"ABC Areal","Montserrat",system-ui,sans-serif;--rail:0px;--panelw:384px;--ink:#e9e9ec;--grey:#5d5d64}
+body{padding-left:0}
+
+/* top left: logo, then one quiet link */
+.top{position:fixed;z-index:60;left:0;top:0;width:var(--panelw);height:72px;display:flex;align-items:center;gap:18px;padding:0 var(--pad);pointer-events:none}
+.top>*{pointer-events:auto}
+.logo{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none}
+.logo:hover{text-decoration:none}
+.logo-mark{width:34px;height:34px;flex:none;overflow:visible}
+.logo-div{width:1px;height:22px;background:rgba(255,255,255,.28)}
+.logo-word{font:400 13px/1 var(--f-head);letter-spacing:.34em;color:#fff}
+.top-link{margin-left:auto;font-size:var(--t-s);color:rgba(255,255,255,.62);text-decoration:none;padding:6px 0;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+.top-link:hover{color:#fff;text-decoration:none;border-bottom-color:rgba(255,255,255,.4)}
+.top-link[hidden]{display:none}
+body[data-route=about] .top{width:100%;background:linear-gradient(#000 40%,rgba(0,0,0,0))}
+body[data-route=about] .top-link{margin-left:24px}
+.fp-scroll{padding-top:72px}
+
+/* grey checkboxes and sliders */
+.ck{appearance:none;-webkit-appearance:none;width:15px;height:15px;margin:0;border:1.5px solid #6b6b72;border-radius:3px;background:transparent;cursor:pointer;display:grid;place-content:center;transition:background .12s,border-color .12s}
+.ck:hover{border-color:#a0a0a6}
+.ck:checked{background:#3b3b41 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/11px no-repeat;border-color:#8b8b92}
+.ck:disabled{opacity:.35;cursor:not-allowed}
+.ck:focus-visible{outline:2px solid #cfcfd4;outline-offset:2px}
+.pr input.ck{width:15px;height:15px}
+.f-range{appearance:none;-webkit-appearance:none;height:16px;background:transparent;cursor:pointer}
+.f-range::-webkit-slider-runnable-track{height:2px;background:#34343a;border-radius:2px}
+.f-range::-moz-range-track{height:2px;background:#34343a;border-radius:2px}
+.f-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-5px;border-radius:50%;background:#cfcfd4;border:0}
+.f-range::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#cfcfd4;border:0}
+.f-range:hover::-webkit-slider-thumb{background:#fff}
+.f-range:focus-visible{outline:none} .f-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+button.chip[aria-pressed=true]{background:#fff;border-color:#fff;color:#000}
+.f-switch{color:var(--text2)}
+
+/* the picked area */
+.area{padding:22px 0 18px}
+.area h1{font:300 var(--t-xl)/1.15 var(--f-head);margin:0 0 10px}
+.area .lede{font-size:var(--t-s);color:var(--text2);margin:0;max-width:62ch;line-height:1.55}
+.area .list{margin-top:14px}
+
+/* stage: two globes */
+.stage{grid-template-rows:92px minmax(0,1fr) 132px}
+.s-info{padding:22px 28px 0}
+.s-globes{grid-row:2;position:relative;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+.g-wrap{position:relative;min-width:0;min-height:0}
+.g-wrap .view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.g-wrap .view.grabbing{cursor:grabbing} .g-wrap .view.hand{cursor:pointer}
+.g-wrap .view:focus-visible{outline:2px solid #cfcfd4;outline-offset:-3px}
+.g-tag{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font-size:var(--t-xs);color:var(--muted);white-space:nowrap;pointer-events:none;letter-spacing:.02em}
+.g-link{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;transition:opacity .25s;z-index:4}
+.lk-path{fill:none;stroke:rgba(255,255,255,.7);stroke-width:1.2;stroke-linecap:round}
+.lk-dot{fill:#fff;stroke:rgba(0,0,0,.6);stroke-width:1.5}
+.lk-spark{fill:#ffb27a;filter:drop-shadow(0 0 4px #ff9a4d)}
+@media (prefers-reduced-motion:reduce){.lk-spark{display:none}}
+
+/* your area next to the place */
+table.cmp{width:100%;border-collapse:collapse;margin-top:14px;font-size:var(--t-xs)}
+table.cmp th{font-weight:500;color:var(--muted);text-align:right;padding:4px 0 6px}
+table.cmp td{padding:5px 0;border-top:1px solid var(--line);color:var(--text2);text-align:right}
+table.cmp td:first-child,table.cmp th:first-child{text-align:left;color:var(--text2)}
+table.cmp td:nth-child(2){color:#ffc69e} table.cmp td:nth-child(3){color:#fff}
+
+/* livelier planets at the panel foot */
+.orbs{gap:24px;padding:14px var(--pad) 16px}
+.orb-b{gap:8px;position:relative}
+.orb{position:relative;width:58px;height:58px;background-size:116px 58px;filter:none;
+  box-shadow:inset -14px -9px 18px rgba(0,0,0,.88),inset 4px 4px 9px rgba(255,255,255,.2),0 0 14px -2px var(--c)}
+.orb::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.32),rgba(255,255,255,0) 42%);pointer-events:none}
+.orb-earth::before,.orb-mars::before{content:"";position:absolute;inset:-3px;border-radius:50%;box-shadow:0 0 0 1px var(--halo),0 0 10px 1px var(--halo);opacity:.55;pointer-events:none}
+.orb-earth{--halo:rgba(120,180,255,.5)} .orb-mars{--halo:rgba(255,160,110,.45)}
+.orb-b:hover .orb{transform:scale(1.08)}
+.orb-b[aria-checked=true] .orb{box-shadow:inset -14px -9px 18px rgba(0,0,0,.88),inset 4px 4px 9px rgba(255,255,255,.2),0 0 0 2px #000,0 0 0 3px var(--c),0 0 22px var(--c)}
+@keyframes orbSpin{from{background-position:0 0}to{background-position:-116px 0}}
+
+/* team in one row */
+.team{grid-template-columns:repeat(6,minmax(0,1fr))}
+.person{display:flex;flex-direction:column;gap:2px}
+.person p{flex:1}
+.person .li{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:var(--t-xs);color:var(--text2);text-decoration:none}
+.person .li:hover{color:#fff;text-decoration:none}
+.person .li svg{width:14px;height:14px}
+.person .li.none{color:var(--muted);opacity:.6}
+.about{max-width:calc(1180px + 2 * var(--pad));padding-top:72px}
+.about>p,.about>ul,.about>ol,.about>h2,.about>.cmp-scroll,.about>header{max-width:860px}
+.fpanel{padding-top:72px} .fp-scroll{padding-top:0}
+.g-tag{bottom:14px}
+.person .role{color:#f2a46f}
+.about .btn.primary{background:#fff;color:#000} .about .btn.primary:hover{background:#e3e3e6}

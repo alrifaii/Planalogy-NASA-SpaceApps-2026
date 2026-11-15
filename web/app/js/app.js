@@ -13,7 +13,7 @@ function route(){
   current = null;
   const name = parse(); TT.clear(main); window.scrollTo(0, 0);
   document.title = titles[name]; document.body.dataset.route = name;
-  nav.querySelectorAll('.rail-item').forEach(a => { if (a.dataset.r === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  nav.querySelectorAll('.top-link').forEach(a => { a.hidden = a.dataset.r === name; });
   try { current = TT.pages[name](main) || null; }
   catch(e){ console.error(e); main.appendChild(TT.h('div', {class:'page'}, TT.h('h1', null, 'Something went wrong'), TT.h('p', {class:'muted'}, 'This page failed to load: ' + e.message))); }
   if (!first) TT.focusMain(); first = false;

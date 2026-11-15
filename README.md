@@ -1,6 +1,16 @@
 # Planeology-NASA-SpaceApps-2026
 A data-driven planetary analogue identification platform using NASA and partner space agency observations, geospatial analysis and mathematical modelling to identify Earth locations suitable for future lunar and Martian mission testing.
 
+## Start the app (no installation)
+
+1. On GitHub: **Code → Download ZIP**, then unzip it.
+2. Windows: double-click **`Start Planalogy.bat`** in the unzipped folder.
+   Mac: double-click **`Start Planalogy (Mac).command`** (the first time: right-click → Open).
+3. Your browser opens the app. Close the black window to stop it.
+
+Windows needs nothing else. The Mac file uses the Python that macOS offers to install on first use.
+Click anywhere on Mars or Earth: the other globe turns to the most similar place.
+
 ## Structure
 
 | Folder | What it is |
@@ -8,6 +18,8 @@ A data-driven planetary analogue identification platform using NASA and partner 
 | `analogue_engine/` | Similarity model (pure Python): comparators, weights, calibration on known analogs, year slider, site cards. See its README and `docs/`. |
 | `backend/` | App backend: data interface, geospatial helpers, mission profiles, integration, and `engine_service.py`, which connects the engine to the data. |
 | `data/grid_1deg/` | Data team's 1°×1° Earth/Mars grid (`earth_1deg.csv`, `mars_1deg.csv`, `parameters.csv`). It comes from branch `data-grid-1deg`. |
+| `data/grid_fine/` | Not committed. The fine grids (Earth 0.25°, Mars 0.5°) the app data is exported from; rebuild with `tools/dataprep/`. |
+| `web/app/` | The app. Its data (`data/planalogy/`) is exported from the fine grids. |
 
 ## Install
 

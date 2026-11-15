@@ -119,11 +119,12 @@ TT.createGlobe = function(canvas, o){
     setOverlay(body, cv){
       if (!planets[body]) { planets[body] = makePlanet(body, renderer, (b, what, e) => { o.onLoad && o.onLoad(b, what, e); }); planets[body].visible = planets[body] === cur; scene.add(planets[body]); }
       const u = planets[body].userData;
+      if (cv && u.overlay && u.overlayCv === cv){ u.overlay.material.map.needsUpdate = true; return; }  /* same canvas: only upload the new pixels */
       if (u.overlay){ planets[body].remove(u.overlay); u.overlay.material.map && u.overlay.material.map.dispose(); u.overlay.material.dispose(); u.overlay = null; }
       if (!cv) return;
       const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
       const m = new THREE.Mesh(new THREE.SphereGeometry(1.0028, 128, 64), new THREE.MeshLambertMaterial({map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: .42, transparent: true, depthWrite: false}));
-      m.renderOrder = 3; planets[body].add(m); u.overlay = m;
+      m.renderOrder = 3; planets[body].add(m); u.overlay = m; u.overlayCv = cv;
     },
     setMarkers(list, keep){
       items = list; if (!cur) return;

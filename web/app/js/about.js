@@ -13,10 +13,10 @@ const TEAM = [
 ];
 
 const STEPS = [
-  ['Pick an area', 'Click anywhere on Mars or on Earth. Planalogy averages the ground in a circle of 100 km radius around the click.'],
-  ['See the match on the other planet', 'Every cell of the other planet is coloured by how closely it resembles your area. That globe turns to the best match and a thin arc links the two places.'],
-  ['Choose a mission', 'A rover drive, sample science, thermal testing or ice prospecting. Each mission weighs the surface differently.'],
-  ['Move through the years', 'The arc under the globes runs from today to 2090 under two climate scenarios. Earth then shows the change since today: red cells drop out, green cells become new analogs, the rest turns blue or orange as it gets more or less similar.'],
+  ['Pick an area on Mars', 'Click anywhere on Mars. Planalogy averages the ground in a circle of 100 km radius around the click.'],
+  ['See the match on Earth', 'Every place on Earth is coloured by how closely it resembles your area. Earth turns to the best match, a thin arc links the two places and the match opens.'],
+  ['Choose a mission (under Mission and weights)', 'A rover drive, sample science, thermal testing or ice prospecting. Each mission weighs the surface differently.'],
+  ['Move through the years', 'The slider under the globes runs from today to 2090, one year at a time, under two climate scenarios; press play to watch it. Earth then shows the change since today: red cells drop out, green cells become new analogs, the rest turns blue or orange as it gets more or less similar.'],
   ['Tune the parameters', 'Switch each parameter on or off and set its weight. The ranking updates at once.']
 ];
 

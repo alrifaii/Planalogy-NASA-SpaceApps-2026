@@ -705,3 +705,33 @@ table.cmp td:nth-child(2){color:#ffc69e} table.cmp td:nth-child(3){color:#fff}
 .g-tag{bottom:14px}
 .person .role{color:#f2a46f}
 .about .btn.primary{background:#fff;color:#000} .about .btn.primary:hover{background:#e3e3e6}
+
+/* ---------- v3: year ratchet, Mars to Earth only ---------- */
+.yr{display:grid;grid-template-columns:44px 132px minmax(0,1fr) auto;align-items:center;gap:22px;width:min(1080px,100%)}
+.yr .tl-scen{position:static}
+.yr-play{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:transparent;display:grid;place-items:center;cursor:pointer;transition:border-color .15s,background .15s}
+.yr-play::before{content:"";margin-left:3px;border-left:12px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent}
+.yr-play.on::before{margin:0;width:12px;height:14px;border:0;border-left:4px solid #fff;border-right:4px solid #fff;box-sizing:border-box}
+.yr-play:hover{border-color:#fff;background:rgba(255,255,255,.06)}
+.yr-big{font:300 34px/1 var(--f-head);color:var(--live);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.yr-big.future{color:#fff}
+.yr-track{position:relative;height:56px}
+.yr-ticks{position:absolute;left:8px;right:8px;top:6px;height:30px;pointer-events:none}
+.yr-ticks i{position:absolute;top:10px;width:1px;height:8px;background:rgba(255,255,255,.22);transform:translateX(-.5px)}
+.yr-ticks i.mj{top:4px;height:14px;background:rgba(255,255,255,.55)}
+.yr-ticks span{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:var(--t-xs);color:var(--text2);white-space:nowrap;font-style:normal}
+.yr-range{position:absolute;left:0;right:0;top:4px;width:100%;margin:0;height:22px;appearance:none;-webkit-appearance:none;background:transparent;cursor:ew-resize;--p:0%}
+.yr-range::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,#fff var(--p),rgba(255,255,255,.18) var(--p))}
+.yr-range::-moz-range-track{height:2px;background:linear-gradient(90deg,#fff var(--p),rgba(255,255,255,.18) var(--p))}
+.yr-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-8px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.12)}
+.yr-range::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.12)}
+.yr-range:focus-visible{outline:none} .yr-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(255,255,255,.35)}
+/* mission and weights: tucked away under the results */
+details.tune>summary{cursor:pointer;list-style:none;font-size:var(--t-s);color:var(--text2);padding:2px 0 8px;display:flex;align-items:center;gap:8px}
+details.tune>summary::-webkit-details-marker{display:none}
+details.tune>summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+details.tune[open]>summary::before{transform:rotate(45deg)}
+details.tune>summary:hover{color:#fff}
+.f-presets.sm{display:flex;flex-wrap:wrap;gap:6px}
+.f-presets.sm .chip{display:inline-flex;font-size:var(--t-xs);min-height:26px;padding:2px 9px}
+.lg-key.lost::before{background:#ff4b4b}

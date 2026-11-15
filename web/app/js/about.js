@@ -4,10 +4,12 @@ const TT = window.TT, h = TT.h;
 
 /* Edit the team here. */
 const TEAM = [
-  {name:'Mohamad Alrifai', role:'Data', does:'Collected and harmonised the Earth and Mars data, built the 1° grid and the future-climate layers.'},
-  {name:'Wojciech Kaczanowski', role:'Science', does:'Chose the parameters, their weights and the dryland and cold-desert rules.'},
-  {name:'Daniel', role:'Engine and backend', does:'Built the similarity engine and the filters that decide which Earth cells are candidates.'},
-  {name:'Jonas Bauer', role:'Team lead and pitch', does:'Keeps the parts together and presents the project.'}
+  {name:'Aldiyar Zhakyp', role:'UI/UX', does:'Leads the user interface and user experience.'},
+  {name:'Daniel V?zquez Pi?eiro', role:'Software', does:'Works on the software and application development.'},
+  {name:'Jonas Bauer', role:'PM / Storytelling', does:'Coordinates the project and shapes its story.'},
+  {name:'Mohamad Alrifai', role:'Data', does:'Leads data collection, processing and climate data integration.'},
+  {name:'Nduka Amakihe', role:'Software', does:'Works on the software and application development.'},
+  {name:'Wojciech Kaczanowski', role:'Space Science', does:'Contributes the planetary science expertise.'}
 ];
 
 const STEPS = [

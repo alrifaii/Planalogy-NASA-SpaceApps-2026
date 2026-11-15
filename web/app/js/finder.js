@@ -361,6 +361,9 @@ TT.pages.finder = function(root){
     }
     (body === 'earth' ? gE : gL).focus(lat, lon, {dist:3.35});
     drawOrbs(); drawArea(); paintAll(); await rescore(); restartLink();
+    /* once the arc has reached the other planet, open the best match */
+    const a = st.area;
+    setTimeout(() => { if (!dead && st.area === a && !st.sel && st.res && st.res.ranked[0]) select(st.res.ranked[0].id, false, true); }, TT.reduced() ? 0 : 1150);
   }
   function flyToBest(){
     const it = st.res && st.res.ranked[0]; if (!it) return;
@@ -368,12 +371,12 @@ TT.pages.finder = function(root){
     restartLink();
   }
   function pickResult(it){ select(it.id, true); }
-  function select(id, fly){
+  function select(id, fly, keepLink){
     st.sel = id; const it = st.res && st.res.ranked.find(x => x.id === id);
     pushMarkers(); paintAll(); drawResults();
     if (fly && it) (target() === 'earth' ? gE : gL).focus(it.lat, it.lon, {dist:2.3});
     const sec = TT.$('#f-results'); if (sec) sec.scrollIntoView({behavior: TT.reduced() ? 'auto' : 'smooth', block:'start'});
-    restartLink();
+    if (!keepLink) restartLink();
   }
 
   /* ---------- panel ---------- */

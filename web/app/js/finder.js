@@ -108,7 +108,7 @@ TT.pages.finder = function(root){
   const legend = h('div', {class:'s-legend'});
   const band = h('div', {class:'s-band'});
   const cvL = h('canvas', {class:'view', role:'application', 'aria-label':'Mars globe. Click to pick an area, drag to turn.'});
-  const cvE = h('canvas', {class:'view', role:'application', 'aria-label':'Earth globe. Click a place to see how well it matches.'});
+  const cvE = h('canvas', {class:'view', role:'application', 'aria-label':'Earth globe. Drag to turn; click a marker to open a match.'});
   const tagL = h('div', {class:'g-tag'}), tagE = h('div', {class:'g-tag'});
   const wrapL = h('div', {class:'g-wrap'}, cvL, tagL), wrapE = h('div', {class:'g-wrap'}, cvE, tagE);
   const link = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); link.setAttribute('class', 'g-link'); link.setAttribute('aria-hidden', 'true');
@@ -118,8 +118,8 @@ TT.pages.finder = function(root){
 
   if (TT.webgl){
     gL = TT.createGlobe(cvL, {body:'mars', markerPx:20, dist:3.35, onPin: (la, lo) => pickArea(la, lo), onPick: () => {}});
-    gE = TT.createGlobe(cvE, {body:'earth', markerPx:20, dist:3.35, onPin: (la, lo) => clickEarth(la, lo), onPick: it => it.body === 'earth' && select(+it.id, true)});
-    gL.setPinMode(true); gE.setPinMode(true);
+    gE = TT.createGlobe(cvE, {body:'earth', markerPx:20, dist:3.35, onPick: it => it.body === 'earth' && select(+it.id, true)});
+    gL.setPinMode(true); gE.setPinMode(false);  /* Earth only turns; its markers open a match */
   } else stage.appendChild(h('p', {class:'no-gl'}, 'The globes need WebGL, which this browser has switched off.'));
 
   /* ---------- weights ---------- */
@@ -310,12 +310,7 @@ TT.pages.finder = function(root){
     const a = st.area;
     setTimeout(() => { if (!dead && st.area === a && st.sel < 0 && top[0] !== undefined) select(top[0], false, true); }, TT.reduced() ? 0 : 1150);
   }
-  function clickEarth(lat, lon){
-    if (!E || !st.area) return;
-    const r = Math.round((90 - lat) / E.step - .5), c = Math.round((lon + 180) / E.step - .5), i = E.grid[r * E.nlon + c];
-    if (i === undefined || i < 0){ TT.toast('That is open water or ice. Click on land.'); return; }
-    select(i, false);
-  }
+
 
   /* today's scores: the reference for "change since today" and the colour scale */
   let P = null;

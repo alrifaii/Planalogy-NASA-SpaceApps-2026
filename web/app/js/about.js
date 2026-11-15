@@ -56,7 +56,7 @@ TT.pages.about = function(root){
     h('div', {class:'cmp-scroll'}, h('table', {class:'t'},
       h('thead', null, h('tr', null, ['Parameter', 'Earth', 'Mars'].map(t => h('th', null, t)))),
       h('tbody', null, SOURCES.map(r => h('tr', null, r.map(c => h('td', null, c))))))),
-    h('p', {class:'small muted'}, 'All layers were brought to one 1° grid with the same parameter names on both planets. Globe imagery: NASA Blue Marble, NASA 3D Resources (Mars), NASA CGI Moon Kit (LRO); relief shading from MOLA and WorldClim elevation.'),
+    h('p', {class:'small muted'}, 'All layers were brought to one 1° grid with the same parameter names on both planets. Globe imagery: Earth from Solar System Scope (CC BY 4.0, based on NASA Blue Marble, summer, snow-free), Mars from NASA 3D Resources, Moon from the NASA CGI Moon Kit (LRO); relief shading from MOLA and WorldClim elevation.'),
 
     h('h2', null, 'What it cannot tell you'),
     h('ul', null, LIMITS.map(x => h('li', null, x))),

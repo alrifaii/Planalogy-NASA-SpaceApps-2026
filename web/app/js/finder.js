@@ -333,7 +333,7 @@ TT.pages.finder = function(root){
     if (!ui.presetBox) return;
     TT.clear(ui.presetBox);
     st.m.presets.forEach(p => ui.presetBox.appendChild(h('button', {class:'chip', type:'button', 'aria-pressed': st.preset === p.id, title: p.name + '. ' + p.mission,
-      onclick: () => { applyPreset(p); drawPresets(); drawSliders(); rescore(); }}, SHORT[p.name] || p.name)));
+      onclick: () => { applyPreset(p); st.sel = null; st.landed = false; drawPresets(); drawSliders(); rescore(); }}, SHORT[p.name] || p.name)));
     const p = st.m.presets.find(x => x.id === st.preset);
     ui.verdict.textContent = !p ? 'Your own weights.' : p.name + (p.weights_used === 'calibrated' ? ', tuned on known analogs.' : ', science team weights.')
       + (st.req.length ? ' Earth site must have ground ice.' : '');

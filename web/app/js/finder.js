@@ -578,12 +578,11 @@ TT.pages.finder = function(root){
   /* ---------- planets at the foot of the panel ---------- */
   function drawOrbs(){
     TT.clear(orbs);
-    [['mars', 'Mars'], ['moon', 'Moon'], ['earth', 'Earth']].forEach(([id, name]) => orbs.appendChild(
-      h('button', {type:'button', role:'radio', class:'orb-b', 'aria-checked': (id === st.pair), title: id === 'earth' ? 'Turn Earth to the best match' : id === 'mars' ? 'Mars' : 'Moon preview',
+    [['mars', 'Mars'], ['moon', 'Moon']].forEach(([id, name]) => orbs.appendChild(
+      h('button', {type:'button', role:'radio', class:'orb-b', 'aria-checked': (id === st.pair), title: id === 'mars' ? 'Mars' : 'Moon preview',
         onclick: () => setPair(id)}, h('i', {class:'orb orb-' + id}), h('span', null, name))));
   }
   function setPair(id){
-    if (id === 'earth'){ const j = st.sel >= 0 ? st.sel : top[0]; if (j !== undefined && E) gE.focus(E.lat[j], E.lon[j], {dist:2.6}); return; }
     if (id === st.pair) return;
     st.pair = id;
     if (id === 'moon'){ gL.setBody('moon'); gL.focus(-60, 20, {dist:3.35}); gL.setMarkers(MOON_SITES.map(m => ({id: m.id, lat: m.lat, lon: m.lon, body:'moon', kind: m.kind}))); }

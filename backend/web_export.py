@@ -44,6 +44,7 @@ hyper-arid land (< 0.05); without it the files are exactly as before.
 from __future__ import annotations
 
 import gzip
+import shutil
 import json
 import sys
 from pathlib import Path
@@ -158,6 +159,20 @@ FUTURE_NOTE = ("Future years: CMIP6 multi-model mean (WorldClim 2.1). Changed: a
                "projected years.")
 
 
+def export_hires(data_dir: Path, out_dir: Path) -> str | None:
+    """Copy the Data team's 1-km site results (data/hires_sites/, made by process_future_hires.py) for the app."""
+    src = Path(data_dir).parent / "hires_sites"
+    summary = src / "future_hires_summary.json"
+    if not summary.exists():
+        return None
+    dst = out_dir / "hires"
+    dst.mkdir(parents=True, exist_ok=True)
+    for f in src.glob("*.png"):
+        shutil.copyfile(f, dst / f.name)
+    shutil.copyfile(summary, dst / "summary.json")
+    return "hires/summary.json"
+
+
 def export(
     data_dir: Path,
     out_dir: Path,
@@ -212,6 +227,9 @@ def export(
     first = scen_ids[0]
     files: dict[str, Any] = {"earth": {"now": "earth" + ext, **{y: n + ext for y, n in scen_files[first].items()}},
                              "mars": "mars" + ext}
+    hires = export_hires(data_dir, out_dir)
+    if hires:
+        files["hires"] = hires
     scenario_list = [{"id": sc, "label": SCENARIO_LABELS.get(sc, sc),
                       "short": SCENARIO_SHORT.get(sc, (sc, ""))[0], "code": SCENARIO_SHORT.get(sc, (sc, sc))[1],
                       "years": [int(y) for y in files_],

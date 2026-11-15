@@ -273,28 +273,28 @@
       "why": "Terrain decides mobility; surface material (thermal inertia, albedo) separates dunes, gravel and bedrock.",
       "target": "gale",
       "category_weights": {
-        "terrain": 0.3754117739001206,
-        "thermal": 0.09657933254730926,
-        "thermophysical": 0.11060657473088502,
-        "optical": 0.20372632160094925,
-        "mineralogy": 0.02613060923907829,
-        "geology": 0.017658755030396794,
-        "craters": 0.07980685547477347,
-        "water": 0.09007977747648725
+        "terrain": 0.3754117739001208,
+        "thermal": 0.09657933254730922,
+        "thermophysical": 0.110606574730885,
+        "optical": 0.2037263216009492,
+        "mineralogy": 0.02613060923907825,
+        "geology": 0.01765875503039679,
+        "craters": 0.07980685547477342,
+        "water": 0.09007977747648722
       },
       "feature_weights": {
-        "slope_deg": 0.13419841427118653,
-        "roughness_m": 0.12242510139116804,
-        "relief_m": 0.11878825823776604,
-        "surface_temp_swing_K": 0.05148982437132437,
-        "surface_temp_min_K": 0.022151651966203386,
-        "air_temp_swing_K": 0.0229378562097815,
-        "ati_percentile": 0.11060657473088502,
-        "albedo": 0.20372632160094925,
-        "mineral_groups": 0.02613060923907829,
-        "rock_group": 0.017658755030396794,
-        "inside_impact_structure": 0.07980685547477347,
-        "ground_ice_flag": 0.09007977747648725
+        "slope_deg": 0.13419841427118667,
+        "roughness_m": 0.12242510139116813,
+        "relief_m": 0.11878825823776601,
+        "surface_temp_swing_K": 0.05148982437132434,
+        "surface_temp_min_K": 0.022151651966203362,
+        "air_temp_swing_K": 0.022937856209781497,
+        "ati_percentile": 0.110606574730885,
+        "albedo": 0.2037263216009492,
+        "mineral_groups": 0.02613060923907825,
+        "rock_group": 0.01765875503039679,
+        "inside_impact_structure": 0.07980685547477342,
+        "ground_ice_flag": 0.09007977747648722
       },
       "requirements": [],
       "required_features": [],
@@ -565,7 +565,8 @@
       "2070": "earth_ssp245_2070.json",
       "2090": "earth_ssp245_2090.json"
     },
-    "mars": "mars.json"
+    "mars": "mars.json",
+    "hires": "hires/summary.json"
   },
   "compression": "none",
   "dry_bare_rule": "NDVI < 0.2 (bare ground), not ice or water, and aridity index <= 0.2 (arid + hyper-arid) or a cold desert (mean air temperature < 0 degC, precipitation < 250 mm/yr, albedo < 0.6) (Science)",

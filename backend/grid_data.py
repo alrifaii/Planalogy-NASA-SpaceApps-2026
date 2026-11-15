@@ -451,8 +451,14 @@ DELTA_COLUMNS = {"surface_temp_swing_K": "air_temp_swing_K", "surface_temp_min_K
 REPLACED_COLUMNS = ["precipitation_mm_yr", "aridity_index", "aridity_class"]
 PROJECTION_NOTE = (
     "Future years: ground temperatures are today's values plus the projected change in air temperature "
-    "(delta method); terrain, rock, craters, albedo, thermal inertia and ground ice keep present values."
+    "(delta method); permafrost thaws where the mean annual air temperature rises above -1 degC; "
+    "terrain, rock, craters, albedo, thermal inertia, glaciers and NDVI keep present values."
 )
+# Permafrost needs a mean annual air temperature below about -1 degC (simple threshold rule, provisional,
+# to confirm with Science). Only cells whose ice comes from permafrost (probability >= 0.5) can thaw;
+# glaciers and ice sheets keep their flag.
+PERMAFROST_MAX_TEMP_K = 272.15
+PERMAFROST_MIN_PROB = 0.5
 
 
 def _is_projection_file(path: Path) -> bool:
@@ -488,6 +494,37 @@ def project(base: dict, proj: dict, ref: dict) -> dict:
             row[ground] = "" if None in (g0, a1, a0) else repr(g0 + (a1 - a0))
         out[key] = row
     return out
+
+
+def thaws(base_row: dict, future_row: dict) -> bool:
+    """Permafrost ice in base_row that the future climate of future_row thaws (see PERMAFROST_MAX_TEMP_K)."""
+    ice, prob = _num(base_row, "ground_ice_flag"), _num(base_row, "permafrost_prob")
+    t0, t1 = _num(base_row, "air_temp_mean_K"), _num(future_row, "air_temp_mean_K")
+    if ice is None or ice < 0.5 or prob is None or prob < PERMAFROST_MIN_PROB or None in (t0, t1):
+        return False
+    return t0 < PERMAFROST_MAX_TEMP_K <= t1
+
+
+def project_complete(base: dict, future: dict) -> dict:
+    """A complete yearly grid (all columns, air climate projected, ground columns copied from today)
+    made consistent with its climate: ground temperatures shift with the air (delta method against the
+    present grid) and permafrost that the warming pushes above PERMAFROST_MAX_TEMP_K loses its ice flag.
+    A file that brings its own ground values (different from today's) keeps them.
+    Returns (grid, changed): changed is False when nothing had to be adjusted.
+    """
+    out, changed = {}, False
+    for key, f in future.items():
+        row, b = dict(f), base.get(key)
+        if b is not None:
+            for ground, air in DELTA_COLUMNS.items():
+                g0, g1, a1, a0 = _num(b, ground), _num(f, ground), _num(f, air), _num(b, air)
+                if g1 != g0 or None in (g0, a1, a0) or a1 == a0:
+                    continue  # projected by the file itself, or no change in the air
+                row[ground] = repr(g0 + (a1 - a0)); changed = True
+            if thaws(b, f):
+                row["ground_ice_flag"] = "0.0"; changed = True
+        out[key] = row
+    return out, changed
 
 
 def with_reference_aridity(base: dict, ref: dict) -> dict:
@@ -572,6 +609,8 @@ def build(
         if ref is None:
             raise ValueError(f"{earth_file} holds only climate columns: it needs a reference year for the delta method")
         earth = project(load_grid(data_dir / base_file), earth, ref)
+    elif base_file is not None and base_file != earth_file:
+        earth, projected = project_complete(load_grid(data_dir / base_file), earth)
     elif projected:
         earth = with_reference_aridity(earth, ref)
     earth_spec, mars_spec = grid_spec("earth", earth), grid_spec("mars", mars)

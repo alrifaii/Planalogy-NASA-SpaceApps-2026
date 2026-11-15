@@ -194,3 +194,22 @@ def test_browser_matches_engine_per_year_and_filter(grid, tmp_path, year, earth_
     assert [i for i, _ in js] == py.order() and len(js) > 0
     for (_, s_js), e in zip(js, py.ranked):
         assert s_js == pytest.approx(e.result.score_observed, abs=1e-12)
+
+
+def test_complete_yearly_file_shifts_ground_and_thaws_permafrost():
+    base = {(70.5, 100.5): {"ground_ice_flag": "1.0", "permafrost_prob": "0.9", "air_temp_mean_K": "270.0",
+                            "air_temp_min_K": "250.0", "surface_temp_min_K": "240.0",
+                            "air_temp_swing_K": "10.0", "surface_temp_swing_K": "20.0"},
+            (75.5, -40.5): {"ground_ice_flag": "1.0", "permafrost_prob": "", "air_temp_mean_K": "250.0",
+                            "air_temp_min_K": "230.0", "surface_temp_min_K": "220.0",
+                            "air_temp_swing_K": "8.0", "surface_temp_swing_K": "15.0"}}
+    fut = {k: dict(v) for k, v in base.items()}
+    fut[(70.5, 100.5)].update(air_temp_mean_K="274.0", air_temp_min_K="255.0", air_temp_swing_K="9.0")
+    fut[(75.5, -40.5)].update(air_temp_mean_K="276.0", air_temp_min_K="236.0")
+    out, changed = g.project_complete(base, fut)
+    assert changed
+    a, b = out[(70.5, 100.5)], out[(75.5, -40.5)]
+    assert float(a["surface_temp_min_K"]) == 245.0 and float(a["surface_temp_swing_K"]) == 19.0
+    assert a["ground_ice_flag"] == "0.0"          # permafrost crosses -1 degC: thaws
+    assert b["ground_ice_flag"] == "1.0"          # glacier (no permafrost probability): keeps its ice
+    assert float(b["surface_temp_min_K"]) == 226.0
